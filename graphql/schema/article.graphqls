@@ -1,0 +1,23 @@
+type Article {
+  id: ID!
+  title: String!
+  content: String!
+  thumbnailUrl: String!
+  author: User!
+}
+
+input NewArticle {
+  title: String!
+  content: String!
+  thumbnailUrl: String!
+}
+
+input UpdateArticle {
+  title: String!
+  content: String!
+  thumbnailUrl: String!
+}
+
+input ArticleFilter {
+  title: String
+}

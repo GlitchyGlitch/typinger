@@ -1,0 +1,17 @@
+type Mutation {
+  createUser(input: NewUser): User!
+  updateUser(uuid: ID!, input: UpdateUser!): User!
+  deleteUser(id: ID!): Boolean!
+  
+  createArticle(input: NewArticle!): Article!
+  updateArticle(id: ID!, input: UpdateArticle!): Article!
+  deleteArticle(id: ID!): Boolean!
+
+  createSetting(input: NewSetting): Setting!
+  updateSetting(id: ID!, input: UpdateSetting!): Setting!
+  deleteSetting(id: ID!): Boolean!
+
+  createImages(input: [NewImage!]!): [Image!]!
+  UpdateImage(id: ID! input: UpdateImage!): Image!
+  deleteImages(ids: [ID!]!): Boolean!
+}

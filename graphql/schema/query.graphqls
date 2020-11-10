@@ -1,0 +1,6 @@
+type Query {
+  user(id: ID): User!
+  articles(filter: ArticleFilter, limit: Int = 10, offset: Int = 0): [Article!]!
+  settings(id: ID): [Setting!]!
+  images(id: ID): [Image!]!
+}
