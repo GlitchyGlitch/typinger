@@ -14,8 +14,8 @@ CREATE TABLE users (
 
 CREATE TABLE articles (
   id UUID DEFAULT uuid_generate_v4(),
-  title VARCHAR(255) NOT NULL,
-  content TEXT UNIQUE NOT NULL,
+  title VARCHAR(255) UNIQUE NOT NULL,
+  content TEXT NOT NULL,
   thumbnail_url VARCHAR(255) NOT NULL,
   author UUID NOT NULL,
   PRIMARY KEY (id),
