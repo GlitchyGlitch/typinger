@@ -14,7 +14,7 @@ func (r *queryResolver) User(ctx context.Context, id *string) (*models.User, err
 	return r.UserRepo.GetUserByID(*id)
 }
 
-func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilter, limit, offset *int) ([]*models.Article, error) {
+func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilter, limit *int, offset *int) ([]*models.Article, error) {
 	return r.ArticleRepo.GetArticles(filter, *limit, *offset)
 }
 
