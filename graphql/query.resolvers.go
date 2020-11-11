@@ -14,12 +14,12 @@ func (r *queryResolver) User(ctx context.Context, id *string) (*models.User, err
 	return r.UserRepo.GetUserByID(*id)
 }
 
-func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilter, limit *int, offset *int) ([]*models.Article, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilter, limit, offset *int) ([]*models.Article, error) {
+	return r.ArticleRepo.GetArticles(filter, *limit, *offset)
 }
 
 func (r *queryResolver) Settings(ctx context.Context, id *string) ([]*models.Setting, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.SettingRepo.GetSettings()
 }
 
 func (r *queryResolver) Images(ctx context.Context, id *string) ([]*models.Image, error) {

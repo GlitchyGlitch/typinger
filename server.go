@@ -24,7 +24,6 @@ func main() {
 
 	DB := postgres.New(opt)
 	defer DB.Close()
-
 	DB.AddQueryHook(&postgres.DBLogger{})
 
 	port := os.Getenv("PORT")
@@ -33,8 +32,10 @@ func main() {
 	}
 
 	userRepo := postgres.UserRepo{DB: DB}
+	articleRepo := postgres.ArticleRepo{DB: DB}
+	settingRepo := postgres.SettingRepo{DB: DB}
 
-	schema := graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{UserRepo: userRepo}})
+	schema := graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{UserRepo: userRepo, ArticleRepo: articleRepo, SettingRepo: settingRepo}})
 
 	srv := handler.NewDefaultServer(schema)
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))

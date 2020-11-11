@@ -8,7 +8,7 @@ import (
 )
 
 type ArticleRepo struct {
-	DB pg.DB
+	DB *pg.DB
 }
 
 func (a *ArticleRepo) GetArticles(filter *models.ArticleFilter, limit, offset int) ([]*models.Article, error) {
