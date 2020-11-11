@@ -10,10 +10,6 @@ import (
 	"github.com/GlitchyGlitch/typinger/models"
 )
 
-func (r *userResolver) UUID(ctx context.Context, obj *models.User) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *userResolver) Articles(ctx context.Context, obj *models.User) ([]*models.Article, error) {
 	panic(fmt.Errorf("not implemented"))
 }

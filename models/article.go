@@ -1,7 +1,7 @@
 package models
 
 type Article struct {
-	ID           string `json:"uuid"`
+	ID           string `json:"id"`
 	Title        string `json:"title"`
 	Content      string `json:"content"`
 	ThumbnailURL string `json:"thumbnailUrl"`

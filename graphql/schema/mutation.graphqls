@@ -1,6 +1,6 @@
 type Mutation {
   createUser(input: NewUser): User!
-  updateUser(uuid: ID!, input: UpdateUser!): User!
+  updateUser(id: ID!, input: UpdateUser!): User!
   deleteUser(id: ID!): Boolean!
   
   createArticle(input: NewArticle!): Article!

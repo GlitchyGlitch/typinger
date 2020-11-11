@@ -1,7 +1,7 @@
 package models
 
 type Setting struct {
-	ID    string `json:"uuid"`
+	ID    string `json:"id"`
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }

@@ -72,7 +72,7 @@ type ComplexityRoot struct {
 		UpdateArticle func(childComplexity int, id string, input models.UpdateArticle) int
 		UpdateImage   func(childComplexity int, id string, input models.UpdateImage) int
 		UpdateSetting func(childComplexity int, id string, input models.UpdateSetting) int
-		UpdateUser    func(childComplexity int, uuid string, input models.UpdateUser) int
+		UpdateUser    func(childComplexity int, id string, input models.UpdateUser) int
 	}
 
 	Query struct {
@@ -91,9 +91,9 @@ type ComplexityRoot struct {
 	User struct {
 		Articles func(childComplexity int) int
 		Email    func(childComplexity int) int
+		ID       func(childComplexity int) int
 		Name     func(childComplexity int) int
 		Role     func(childComplexity int) int
-		UUID     func(childComplexity int) int
 	}
 }
 
@@ -102,7 +102,7 @@ type ArticleResolver interface {
 }
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input *models.NewUser) (*models.User, error)
-	UpdateUser(ctx context.Context, uuid string, input models.UpdateUser) (*models.User, error)
+	UpdateUser(ctx context.Context, id string, input models.UpdateUser) (*models.User, error)
 	DeleteUser(ctx context.Context, id string) (bool, error)
 	CreateArticle(ctx context.Context, input models.NewArticle) (*models.Article, error)
 	UpdateArticle(ctx context.Context, id string, input models.UpdateArticle) (*models.Article, error)
@@ -121,8 +121,6 @@ type QueryResolver interface {
 	Images(ctx context.Context, id *string) ([]*models.Image, error)
 }
 type UserResolver interface {
-	UUID(ctx context.Context, obj *models.User) (string, error)
-
 	Articles(ctx context.Context, obj *models.User) ([]*models.Article, error)
 }
 
@@ -346,7 +344,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateUser(childComplexity, args["uuid"].(string), args["input"].(models.UpdateUser)), true
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["id"].(string), args["input"].(models.UpdateUser)), true
 
 	case "Query.articles":
 		if e.complexity.Query.Articles == nil {
@@ -431,6 +429,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Email(childComplexity), true
 
+	case "User.id":
+		if e.complexity.User.ID == nil {
+			break
+		}
+
+		return e.complexity.User.ID(childComplexity), true
+
 	case "User.name":
 		if e.complexity.User.Name == nil {
 			break
@@ -444,13 +449,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Role(childComplexity), true
-
-	case "User.uuid":
-		if e.complexity.User.UUID == nil {
-			break
-		}
-
-		return e.complexity.User.UUID(childComplexity), true
 
 	}
 	return 0, false
@@ -562,7 +560,7 @@ input UpdateImage {
 }`, BuiltIn: false},
 	{Name: "graphql/schema/mutation.graphqls", Input: `type Mutation {
   createUser(input: NewUser): User!
-  updateUser(uuid: ID!, input: UpdateUser!): User!
+  updateUser(id: ID!, input: UpdateUser!): User!
   deleteUser(id: ID!): Boolean!
   
   createArticle(input: NewArticle!): Article!
@@ -604,7 +602,7 @@ input UpdateSetting {
 }
 
 type User {
-  uuid: ID!
+  id: ID!
   name: String!
   email: String!
   role: Role!
@@ -827,14 +825,14 @@ func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, 
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["uuid"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("uuid"))
+	if tmp, ok := rawArgs["id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 		arg0, err = ec.unmarshalNID2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["uuid"] = arg0
+	args["id"] = arg0
 	var arg1 models.UpdateUser
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
@@ -1360,7 +1358,7 @@ func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, args["uuid"].(string), args["input"].(models.UpdateUser))
+		return ec.resolvers.Mutation().UpdateUser(rctx, args["id"].(string), args["input"].(models.UpdateUser))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2141,7 +2139,7 @@ func (ec *executionContext) _Setting_value(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _User_uuid(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
+func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2152,14 +2150,14 @@ func (ec *executionContext) _User_uuid(ctx context.Context, field graphql.Collec
 		Object:     "User",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().UUID(rctx, obj)
+		return obj.ID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4037,20 +4035,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("User")
-		case "uuid":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._User_uuid(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+		case "id":
+			out.Values[i] = ec._User_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "name":
 			out.Values[i] = ec._User_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

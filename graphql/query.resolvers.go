@@ -11,7 +11,7 @@ import (
 )
 
 func (r *queryResolver) User(ctx context.Context, id *string) (*models.User, error) {
-	return r.UserRepo.GetByID(id)
+	return r.UserRepo.GetUserByID(*id)
 }
 
 func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilter, limit *int, offset *int) ([]*models.Article, error) {

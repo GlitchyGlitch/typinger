@@ -14,7 +14,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input *models.NewUser
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) UpdateUser(ctx context.Context, uuid string, input models.UpdateUser) (*models.User, error) {
+func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input models.UpdateUser) (*models.User, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
