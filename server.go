@@ -34,13 +34,12 @@ func main() {
 	userRepo := postgres.UserRepo{DB: DB}
 	articleRepo := postgres.ArticleRepo{DB: DB}
 	settingRepo := postgres.SettingRepo{DB: DB}
-
 	schema := graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{UserRepo: userRepo, ArticleRepo: articleRepo, SettingRepo: settingRepo}})
 
 	srv := handler.NewDefaultServer(schema)
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Printf("🚀 Server running on http://localhost:%s/", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

@@ -36,7 +36,11 @@ func (a *ArticleRepo) GetArticles(filter *models.ArticleFilter, limit, offset in
 	return articles, nil
 }
 
-func (a *ArticleRepo) CreateArticle(article *models.Article) (*models.Article, error) {
+func (a *ArticleRepo) CreateArticle(input models.NewArticle) (*models.Article, error) {
+	article := &models.Article{Title: input.Title, Content: input.Content, ThumbnailURL: input.ThumbnailURL, Author: "173057db-f127-4185-99df-dfa33787432d"} // TODO: Replace with author ID form auth module later
 	_, err := a.DB.Model(article).Returning("*").Insert()
-	return article, err
+	if err != nil {
+		return nil, err
+	}
+	return article, nil
 }
