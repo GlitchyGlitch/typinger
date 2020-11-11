@@ -3,7 +3,7 @@ package models
 import "github.com/99designs/gqlgen/graphql"
 
 type Image struct {
-	ID      string `json:"uuid"`
+	ID      string `json:"id"`
 	Name    string `json:"name"`
 	Content string `json:"content"`
 	URL     string `json:"url"`
