@@ -23,7 +23,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 }
 
 func (r *mutationResolver) CreateArticle(ctx context.Context, input models.NewArticle) (*models.Article, error) {
-	return r.ArticleRepo.CreateArticle(input)
+	return r.Repos.CreateArticle(&input)
 }
 
 func (r *mutationResolver) UpdateArticle(ctx context.Context, id string, input models.UpdateArticle) (*models.Article, error) {

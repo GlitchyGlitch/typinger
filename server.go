@@ -3,14 +3,15 @@ package main
 import (
 	"log"
 	"net/http"
+
 	"os"
 
+	"github.com/GlitchyGlitch/typinger/dataloaders"
 	"github.com/GlitchyGlitch/typinger/graphql"
-	// "github.com/GlitchyGlitch/typinger/graphql/dataloaders"
 	"github.com/GlitchyGlitch/typinger/postgres"
 
-	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+
 	"github.com/go-pg/pg"
 )
 
@@ -31,14 +32,13 @@ func main() {
 		port = defaultPort
 	}
 
-	userRepo := postgres.UserRepo{DB: DB}
-	articleRepo := postgres.ArticleRepo{DB: DB}
-	settingRepo := postgres.SettingRepo{DB: DB}
-	schema := graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{UserRepo: userRepo, ArticleRepo: articleRepo, SettingRepo: settingRepo}})
+	repos := postgres.NewRepos(DB)
+	dl := dataloaders.NewRetriever()
+	dlMiddleware := dataloaders.Middleware(repos)
+	handler := graphql.Handler(repos, dl)
 
-	srv := handler.NewDefaultServer(schema)
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/query", dlMiddleware(handler))
 
 	log.Printf("🚀 Server running on http://localhost:%s/", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

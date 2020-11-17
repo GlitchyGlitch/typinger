@@ -1,9 +1,13 @@
 package graphql
 
-import "github.com/GlitchyGlitch/typinger/postgres"
+//go:generate go run github.com/99designs/
+
+import (
+	"github.com/GlitchyGlitch/typinger/dataloaders"
+	"github.com/GlitchyGlitch/typinger/postgres"
+)
 
 type Resolver struct {
-	UserRepo    postgres.UserRepo
-	ArticleRepo postgres.ArticleRepo
-	SettingRepo postgres.SettingRepo
+	Repos       postgres.Repos
+	DataLoaders dataloaders.Retriever
 }

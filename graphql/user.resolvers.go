@@ -5,13 +5,12 @@ package graphql
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/GlitchyGlitch/typinger/models"
 )
 
 func (r *userResolver) Articles(ctx context.Context, obj *models.User) ([]*models.Article, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.DataLoaders.Retrieve(ctx).ArticlesByUserIDs.Load(obj.ID)
 }
 
 // User returns UserResolver implementation.

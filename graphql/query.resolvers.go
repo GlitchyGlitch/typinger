@@ -11,15 +11,15 @@ import (
 )
 
 func (r *queryResolver) User(ctx context.Context, id *string) (*models.User, error) {
-	return r.UserRepo.GetUserByID(*id)
+	return r.Repos.GetUserByID(*id)
 }
 
 func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilter, limit *int, offset *int) ([]*models.Article, error) {
-	return r.ArticleRepo.GetArticles(filter, *limit, *offset)
+	return r.Repos.GetArticles(filter, *limit, *offset)
 }
 
 func (r *queryResolver) Settings(ctx context.Context, id *string) ([]*models.Setting, error) {
-	return r.SettingRepo.GetSettings()
+	return r.Repos.GetSettings()
 }
 
 func (r *queryResolver) Images(ctx context.Context, id *string) ([]*models.Image, error) {

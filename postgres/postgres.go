@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/go-pg/pg"
 )
@@ -13,7 +13,7 @@ func (d DBLogger) BeforeQuery(q *pg.QueryEvent) {
 }
 
 func (d DBLogger) AfterQuery(q *pg.QueryEvent) {
-	fmt.Println(q.FormattedQuery())
+	log.Println(q.FormattedQuery())
 }
 
 func New(opts *pg.Options) *pg.DB {

@@ -36,7 +36,27 @@ func (a *ArticleRepo) GetArticles(filter *models.ArticleFilter, limit, offset in
 	return articles, nil
 }
 
-func (a *ArticleRepo) CreateArticle(input models.NewArticle) (*models.Article, error) {
+func (a *ArticleRepo) GetArticlesByUserIDs(ids []string) ([][]*models.Article, []error) {
+	var articles []*models.Article
+	result := make([][]*models.Article, len(ids))
+	aMap := make(map[string][]*models.Article, len(ids))
+
+	err := a.DB.Model(&articles).Where("author in (?)", pg.In(ids)).Order("author").Select()
+	if err != nil {
+		return nil, []error{err}
+	}
+
+	for _, article := range articles {
+		aMap[article.Author] = append(aMap[article.Author], article)
+	}
+
+	for i, id := range ids {
+		result[i] = aMap[id]
+	}
+	return result, nil
+}
+
+func (a *ArticleRepo) CreateArticle(input *models.NewArticle) (*models.Article, error) {
 	article := &models.Article{Title: input.Title, Content: input.Content, ThumbnailURL: input.ThumbnailURL, Author: "173057db-f127-4185-99df-dfa33787432d"} // TODO: Replace with author ID form auth module later
 	_, err := a.DB.Model(article).Returning("*").Insert()
 	if err != nil {
