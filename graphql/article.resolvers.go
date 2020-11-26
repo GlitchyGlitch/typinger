@@ -6,11 +6,12 @@ package graphql
 import (
 	"context"
 
+	"github.com/GlitchyGlitch/typinger/dataloaders"
 	"github.com/GlitchyGlitch/typinger/models"
 )
 
 func (r *articleResolver) Author(ctx context.Context, obj *models.Article) (*models.User, error) {
-	return r.DataLoaders.Retrieve(ctx).UserByIDs.Load(obj.Author)
+	return dataloaders.ForContext(ctx).UserByIDs.Load(obj.Author)
 }
 
 // Article returns ArticleResolver implementation.

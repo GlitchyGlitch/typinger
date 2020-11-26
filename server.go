@@ -33,9 +33,8 @@ func main() {
 	}
 
 	repos := postgres.NewRepos(DB)
-	dl := dataloaders.NewRetriever()
 	dlMiddleware := dataloaders.Middleware(repos)
-	handler := graphql.Handler(repos, dl)
+	handler := graphql.Handler(repos)
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", dlMiddleware(handler))

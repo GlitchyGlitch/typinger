@@ -6,11 +6,12 @@ package graphql
 import (
 	"context"
 
+	"github.com/GlitchyGlitch/typinger/dataloaders"
 	"github.com/GlitchyGlitch/typinger/models"
 )
 
 func (r *userResolver) Articles(ctx context.Context, obj *models.User) ([]*models.Article, error) {
-	return r.DataLoaders.Retrieve(ctx).ArticlesByUserIDs.Load(obj.ID)
+	return dataloaders.ForContext(ctx).ArticlesByUserIDs.Load(obj.ID)
 }
 
 // User returns UserResolver implementation.
