@@ -3,14 +3,15 @@ package graphql
 import (
 	"net/http"
 
-	"github.com/99designs/gqlgen/handler"
-	"github.com/GlitchyGlitch/typinger/postgres"
+	"github.com/99designs/gqlgen/graphql/handler"
 )
 
-func Handler(repos postgres.Repos) http.Handler {
-	return handler.GraphQL(NewExecutableSchema(Config{
+func Server(rep repos) http.Handler {
+	s := handler.NewDefaultServer(NewExecutableSchema(Config{
 		Resolvers: &Resolver{
-			Repos: repos,
+			Repos: rep,
 		},
 	}))
+	s.SetErrorPresenter(ErrorPresenter()) // TODO: fove it ro server.go somehow
+	return s
 }

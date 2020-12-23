@@ -1,6 +1,9 @@
-package postgres
+package services
 
 import (
+	"context"
+
+	"github.com/GlitchyGlitch/typinger/errs"
 	"github.com/GlitchyGlitch/typinger/models"
 	"github.com/go-pg/pg"
 )
@@ -9,9 +12,17 @@ type UserRepo struct {
 	DB *pg.DB
 }
 
-func (u *UserRepo) GetUserByID(id string) (*models.User, error) {
+func (u *UserRepo) GetUserByID(ctx context.Context, id string) (*models.User, error) {
 	user := &models.User{}
 	err := u.DB.Model(user).Where("id = ?", id).First()
+	if err != nil {
+		return nil, errs.ErrEmpty(ctx)
+	}
+	return user, nil
+}
+func (u *UserRepo) GetUserByEmail(email string) (*models.User, error) {
+	user := &models.User{}
+	err := u.DB.Model(user).Where("email = ?", email).First()
 
 	return user, err
 }

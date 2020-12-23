@@ -1,2 +1,5 @@
 TODO: Max limit of posts to fech
 TODO: Use context for repositories
+TODO: Create config struct to handle configuration
+TODO: remove service.Repos and make different interfaces
+TODO: Pass context to services.

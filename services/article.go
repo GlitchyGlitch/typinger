@@ -1,4 +1,4 @@
-package postgres
+package services
 
 import (
 	"fmt"
@@ -8,7 +8,8 @@ import (
 )
 
 type ArticleRepo struct {
-	DB *pg.DB
+	DB         *pg.DB
+	errHandler ErrHandler
 }
 
 func (a *ArticleRepo) GetArticles(filter *models.ArticleFilter, limit, offset int) ([]*models.Article, error) {
@@ -30,7 +31,7 @@ func (a *ArticleRepo) GetArticles(filter *models.ArticleFilter, limit, offset in
 
 	err := query.Select()
 	if err != nil {
-		return nil, err
+		return nil, a.errHandler.Error("internal")
 	}
 
 	return articles, nil

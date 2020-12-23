@@ -68,6 +68,8 @@ type ComplexityRoot struct {
 		DeleteImages  func(childComplexity int, ids []string) int
 		DeleteSetting func(childComplexity int, id string) int
 		DeleteUser    func(childComplexity int, id string) int
+		Login         func(childComplexity int, input models.LoginInput) int
+		RefreshToken  func(childComplexity int, input models.RefreshTokenInput) int
 		UpdateArticle func(childComplexity int, id string, input models.UpdateArticle) int
 		UpdateImage   func(childComplexity int, id string, input models.UpdateImage) int
 		UpdateSetting func(childComplexity int, id string, input models.UpdateSetting) int
@@ -92,7 +94,6 @@ type ComplexityRoot struct {
 		Email    func(childComplexity int) int
 		ID       func(childComplexity int) int
 		Name     func(childComplexity int) int
-		Role     func(childComplexity int) int
 	}
 }
 
@@ -112,6 +113,8 @@ type MutationResolver interface {
 	CreateImages(ctx context.Context, input []*models.NewImage) ([]*models.Image, error)
 	UpdateImage(ctx context.Context, id string, input models.UpdateImage) (*models.Image, error)
 	DeleteImages(ctx context.Context, ids []string) (bool, error)
+	Login(ctx context.Context, input models.LoginInput) (string, error)
+	RefreshToken(ctx context.Context, input models.RefreshTokenInput) (string, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, id *string) (*models.User, error)
@@ -290,6 +293,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteUser(childComplexity, args["id"].(string)), true
 
+	case "Mutation.login":
+		if e.complexity.Mutation.Login == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_login_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Login(childComplexity, args["input"].(models.LoginInput)), true
+
+	case "Mutation.refreshToken":
+		if e.complexity.Mutation.RefreshToken == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_refreshToken_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RefreshToken(childComplexity, args["input"].(models.RefreshTokenInput)), true
+
 	case "Mutation.updateArticle":
 		if e.complexity.Mutation.UpdateArticle == nil {
 			break
@@ -435,13 +462,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Name(childComplexity), true
 
-	case "User.role":
-		if e.complexity.User.Role == nil {
-			break
-		}
-
-		return e.complexity.User.Role(childComplexity), true
-
 	}
 	return 0, false
 }
@@ -530,6 +550,15 @@ input ArticleFilter {
   title: String
 }
 `, BuiltIn: false},
+	{Name: "graphql/schema/auth.graphqls", Input: `input LoginInput {
+  email: String!
+  password: String!
+}
+
+input RefreshTokenInput {
+  token: String!
+}
+`, BuiltIn: false},
 	{Name: "graphql/schema/image.graphqls", Input: `scalar Upload
 
 type Image {
@@ -550,28 +579,37 @@ input UpdateImage {
   file: Upload
 }`, BuiltIn: false},
 	{Name: "graphql/schema/mutation.graphqls", Input: `type Mutation {
+  # Users
   createUser(input: NewUser): User!
   updateUser(id: ID!, input: UpdateUser!): User!
   deleteUser(id: ID!): Boolean!
   
+  # Articles
   createArticle(input: NewArticle!): Article!
   updateArticle(id: ID!, input: UpdateArticle!): Article!
   deleteArticle(id: ID!): Boolean!
 
+  # Settings
   createSetting(input: NewSetting): Setting!
   updateSetting(id: ID!, input: UpdateSetting!): Setting!
   deleteSetting(id: ID!): Boolean!
 
+  # Images
   createImages(input: [NewImage!]!): [Image!]!
   UpdateImage(id: ID! input: UpdateImage!): Image!
   deleteImages(ids: [ID!]!): Boolean!
+
+  # Authentication
+  login(input: LoginInput!): String!
+  refreshToken(input: RefreshTokenInput!): String!
 }`, BuiltIn: false},
 	{Name: "graphql/schema/query.graphqls", Input: `type Query {
   user(id: ID): User!
   articles(filter: ArticleFilter, limit: Int = 10, offset: Int = 0): [Article!]!
   settings(id: ID): [Setting!]!
   images(id: ID): [Image!]!
-}`, BuiltIn: false},
+}
+`, BuiltIn: false},
 	{Name: "graphql/schema/setting.graphqls", Input: `type Setting {
   id: ID!
   key: String!
@@ -587,16 +625,10 @@ input UpdateSetting {
   key: String!
   value: String!
 }`, BuiltIn: false},
-	{Name: "graphql/schema/user.graphqls", Input: `enum Role {
-  ADMIN
-  AUTHOR
-}
-
-type User {
+	{Name: "graphql/schema/user.graphqls", Input: `type User {
   id: ID!
   name: String!
   email: String!
-  role: Role!
   articles: [Article!]!
 }
 
@@ -604,14 +636,12 @@ input NewUser {
   name: String!
   email: String!
   password: String!
-  role: Role!
 }
 
 input UpdateUser {
   name: String
   email: String
   password: String
-  role: Role
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -761,6 +791,36 @@ func (ec *executionContext) field_Mutation_deleteUser_args(ctx context.Context, 
 		}
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 models.LoginInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNLoginInput2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐLoginInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_refreshToken_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 models.RefreshTokenInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNRefreshTokenInput2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐRefreshTokenInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -1751,6 +1811,90 @@ func (ec *executionContext) _Mutation_deleteImages(ctx context.Context, field gr
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_login_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Login(rctx, args["input"].(models.LoginInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_refreshToken(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_refreshToken_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RefreshToken(rctx, args["input"].(models.RefreshTokenInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2198,41 +2342,6 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _User_role(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Role, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(models.Role)
-	fc.Result = res
-	return ec.marshalNRole2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐRole(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_articles(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
@@ -3377,6 +3486,34 @@ func (ec *executionContext) unmarshalInputArticleFilter(ctx context.Context, obj
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputLoginInput(ctx context.Context, obj interface{}) (models.LoginInput, error) {
+	var it models.LoginInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "password":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			it.Password, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewArticle(ctx context.Context, obj interface{}) (models.NewArticle, error) {
 	var it models.NewArticle
 	var asMap = obj.(map[string]interface{})
@@ -3507,11 +3644,23 @@ func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj inter
 			if err != nil {
 				return it, err
 			}
-		case "role":
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputRefreshTokenInput(ctx context.Context, obj interface{}) (models.RefreshTokenInput, error) {
+	var it models.RefreshTokenInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "token":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
-			it.Role, err = ec.unmarshalNRole2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐRole(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+			it.Token, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3648,14 +3797,6 @@ func (ec *executionContext) unmarshalInputUpdateUser(ctx context.Context, obj in
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
 			it.Password, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "role":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
-			it.Role, err = ec.unmarshalORole2ᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐRole(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3841,6 +3982,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "login":
+			out.Values[i] = ec._Mutation_login(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "refreshToken":
+			out.Values[i] = ec._Mutation_refreshToken(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3998,11 +4149,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "email":
 			out.Values[i] = ec._User_email(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "role":
-			out.Values[i] = ec._User_role(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -4438,6 +4584,11 @@ func (ec *executionContext) marshalNImage2ᚖgithubᚗcomᚋGlitchyGlitchᚋtypi
 	return ec._Image(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNLoginInput2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐLoginInput(ctx context.Context, v interface{}) (models.LoginInput, error) {
+	res, err := ec.unmarshalInputLoginInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNNewArticle2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐNewArticle(ctx context.Context, v interface{}) (models.NewArticle, error) {
 	res, err := ec.unmarshalInputNewArticle(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4469,14 +4620,9 @@ func (ec *executionContext) unmarshalNNewImage2ᚖgithubᚗcomᚋGlitchyGlitch�
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNRole2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐRole(ctx context.Context, v interface{}) (models.Role, error) {
-	var res models.Role
-	err := res.UnmarshalGQL(v)
+func (ec *executionContext) unmarshalNRefreshTokenInput2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐRefreshTokenInput(ctx context.Context, v interface{}) (models.RefreshTokenInput, error) {
+	res, err := ec.unmarshalInputRefreshTokenInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNRole2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v models.Role) graphql.Marshaler {
-	return v
 }
 
 func (ec *executionContext) marshalNSetting2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐSetting(ctx context.Context, sel ast.SelectionSet, v models.Setting) graphql.Marshaler {
@@ -4899,22 +5045,6 @@ func (ec *executionContext) unmarshalONewUser2ᚖgithubᚗcomᚋGlitchyGlitchᚋ
 	}
 	res, err := ec.unmarshalInputNewUser(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalORole2ᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐRole(ctx context.Context, v interface{}) (*models.Role, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var res = new(models.Role)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalORole2ᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐRole(ctx context.Context, sel ast.SelectionSet, v *models.Role) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

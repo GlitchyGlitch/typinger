@@ -1,13 +1,7 @@
-enum Role {
-  ADMIN
-  AUTHOR
-}
-
 type User {
   id: ID!
   name: String!
   email: String!
-  role: Role!
   articles: [Article!]!
 }
 
@@ -15,12 +9,10 @@ input NewUser {
   name: String!
   email: String!
   password: String!
-  role: Role!
 }
 
 input UpdateUser {
   name: String
   email: String
   password: String
-  role: Role
 }

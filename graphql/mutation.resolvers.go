@@ -58,6 +58,14 @@ func (r *mutationResolver) DeleteImages(ctx context.Context, ids []string) (bool
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *mutationResolver) Login(ctx context.Context, input models.LoginInput) (string, error) {
+	return r.Repos.Authenticate(input)
+}
+
+func (r *mutationResolver) RefreshToken(ctx context.Context, input models.RefreshTokenInput) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

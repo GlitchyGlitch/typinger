@@ -3,8 +3,6 @@ package dataloaders
 import (
 	"context"
 	"net/http"
-
-	"github.com/GlitchyGlitch/typinger/postgres"
 )
 
 type contextKey string
@@ -12,11 +10,11 @@ type contextKey string
 const key = contextKey("dataloaders")
 
 //Middleware is a intermediary function that allows fix graphql's n+1 problem
-func Middleware(repos postgres.Repos) func(http.Handler) http.Handler {
+func Middleware(rep repos) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			loaders := newLoaders(repos)
+			loaders := newLoaders(rep)
 			augmentedCtx := context.WithValue(ctx, key, loaders)
 			r = r.WithContext(augmentedCtx)
 			next.ServeHTTP(w, r)
@@ -24,7 +22,11 @@ func Middleware(repos postgres.Repos) func(http.Handler) http.Handler {
 	}
 }
 
-//ForContext is function that returns a bunch of dataloaders as pointer to Loaders struct
-func ForContext(ctx context.Context) *Loaders {
-	return ctx.Value(key).(*Loaders)
+// FromContext is function that returns a bunch of dataloaders as pointer to Loaders struct
+func FromContext(ctx context.Context) *Loaders {
+	loaders, ok := ctx.Value(key).(*Loaders)
+	if !ok {
+		return nil
+	}
+	return loaders
 }

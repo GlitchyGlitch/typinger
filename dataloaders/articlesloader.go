@@ -2,14 +2,12 @@ package dataloaders
 
 import (
 	"time"
-
-	"github.com/GlitchyGlitch/typinger/postgres"
 )
 
-func newArticlesByUserIDs(repos postgres.Repos) *ArticlesLoader {
+func newArticlesByUserIDs(rep repos) *ArticlesLoader {
 	return NewArticlesLoader(ArticlesLoaderConfig{
 		MaxBatch: 100,
 		Wait:     5 * time.Millisecond,
-		Fetch:    repos.GetArticlesByUserIDs,
+		Fetch:    rep.GetArticlesByUserIDs,
 	})
 }

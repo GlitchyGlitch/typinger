@@ -11,7 +11,7 @@ import (
 )
 
 func (r *articleResolver) Author(ctx context.Context, obj *models.Article) (*models.User, error) {
-	return dataloaders.ForContext(ctx).UserByIDs.Load(obj.Author)
+	return dataloaders.FromContext(ctx).UserByIDs.Load(obj.Author)
 }
 
 // Article returns ArticleResolver implementation.

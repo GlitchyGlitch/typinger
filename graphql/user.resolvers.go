@@ -11,7 +11,7 @@ import (
 )
 
 func (r *userResolver) Articles(ctx context.Context, obj *models.User) ([]*models.Article, error) {
-	return dataloaders.ForContext(ctx).ArticlesByUserIDs.Load(obj.ID)
+	return dataloaders.FromContext(ctx).ArticlesByUserIDs.Load(obj.ID)
 }
 
 // User returns UserResolver implementation.

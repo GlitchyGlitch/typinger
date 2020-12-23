@@ -1,4 +1,4 @@
-package postgres
+package services
 
 import (
 	"github.com/GlitchyGlitch/typinger/models"

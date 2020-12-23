@@ -1,14 +1,13 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE TYPE role AS ENUM ('ADMIN', 'AUTHOR');
+SET TIMEZONE="utc";
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE users (
   id UUID DEFAULT uuid_generate_v4(),
   name VARCHAR(55) NOT NULL,
   email VARCHAR(255) UNIQUE,
-  role ROLE,
-  password VARCHAR(60),
-  active BOOLEAN DEFAULT true NOT NULL,
+  password_hash VARCHAR(60),
+  deleted_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NULL,
   PRIMARY KEY (id)
 );
 
@@ -18,6 +17,7 @@ CREATE TABLE articles (
   content TEXT NOT NULL,
   thumbnail_url VARCHAR(255) NOT NULL,
   author UUID NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT Now(),
   PRIMARY KEY (id),
   FOREIGN KEY(author) REFERENCES users(id)
 );

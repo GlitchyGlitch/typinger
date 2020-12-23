@@ -1,0 +1,8 @@
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input RefreshTokenInput {
+  token: String!
+}

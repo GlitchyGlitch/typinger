@@ -1,17 +1,25 @@
 type Mutation {
+  # Users
   createUser(input: NewUser): User!
   updateUser(id: ID!, input: UpdateUser!): User!
   deleteUser(id: ID!): Boolean!
   
+  # Articles
   createArticle(input: NewArticle!): Article!
   updateArticle(id: ID!, input: UpdateArticle!): Article!
   deleteArticle(id: ID!): Boolean!
 
+  # Settings
   createSetting(input: NewSetting): Setting!
   updateSetting(id: ID!, input: UpdateSetting!): Setting!
   deleteSetting(id: ID!): Boolean!
 
+  # Images
   createImages(input: [NewImage!]!): [Image!]!
   UpdateImage(id: ID! input: UpdateImage!): Image!
   deleteImages(ids: [ID!]!): Boolean!
+
+  # Authentication
+  login(input: LoginInput!): String!
+  refreshToken(input: RefreshTokenInput!): String!
 }
