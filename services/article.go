@@ -1,8 +1,10 @@
 package services
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/GlitchyGlitch/typinger/errs"
 	"github.com/GlitchyGlitch/typinger/models"
 	"github.com/go-pg/pg"
 )
@@ -44,7 +46,7 @@ func (a *ArticleRepo) GetArticlesByUserIDs(ids []string) ([][]*models.Article, [
 
 	err := a.DB.Model(&articles).Where("author in (?)", pg.In(ids)).Order("author").Select()
 	if err != nil {
-		return nil, []error{err}
+		return nil, []error{} // TODO: error here
 	}
 
 	for _, article := range articles {
@@ -57,11 +59,11 @@ func (a *ArticleRepo) GetArticlesByUserIDs(ids []string) ([][]*models.Article, [
 	return result, nil
 }
 
-func (a *ArticleRepo) CreateArticle(input *models.NewArticle) (*models.Article, error) {
-	article := &models.Article{Title: input.Title, Content: input.Content, ThumbnailURL: input.ThumbnailURL, Author: "173057db-f127-4185-99df-dfa33787432d"} // TODO: Replace with author ID form auth module later
+func (a *ArticleRepo) CreateArticle(ctx context.Context, user *models.User, input *models.NewArticle) (*models.Article, error) {
+	article := &models.Article{Title: input.Title, Content: input.Content, ThumbnailURL: input.ThumbnailURL, Author: user.ID}
 	_, err := a.DB.Model(article).Returning("*").Insert()
 	if err != nil {
-		return nil, err
+		return nil, errs.Exists(ctx)
 	}
 	return article, nil
 }

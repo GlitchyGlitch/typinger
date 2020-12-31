@@ -7,8 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/99designs/gqlgen/graphql"
-
 	"github.com/GlitchyGlitch/typinger/auth"
 	"github.com/GlitchyGlitch/typinger/errs"
 	"github.com/GlitchyGlitch/typinger/models"
@@ -16,10 +14,10 @@ import (
 
 func (r *queryResolver) User(ctx context.Context, id *string) (*models.User, error) {
 	if !auth.Authorize(auth.FromContext(ctx)) {
-		graphql.AddError(ctx, errs.ErrForbidden(ctx)) //TODO: Put a bug tracker here
-		return nil, nil
+		return nil, errs.Forbidden(ctx)
 	}
-	return r.Repos.GetUserByID(ctx, *id)
+
+	return r.Repos.GetUserByID(ctx, id)
 }
 
 func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilter, limit *int, offset *int) ([]*models.Article, error) {

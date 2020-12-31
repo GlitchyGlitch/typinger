@@ -44,10 +44,11 @@ func main() {
 	router.Use(auth.Middleware(repos))
 	router.Use(dataloaders.Middleware(repos))
 
-	s := graphql.Server(repos)
+	errPresenter := graphql.ErrorPresenter()
+	s := graphql.Server(repos, errPresenter)
 
-	router.Handle("/query", s)
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", s)
 
 	log.Printf("🚀 Server running on http://localhost:%s/", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))

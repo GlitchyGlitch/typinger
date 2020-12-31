@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	"github.com/GlitchyGlitch/typinger/auth"
 	"github.com/GlitchyGlitch/typinger/errs"
 	"github.com/GlitchyGlitch/typinger/models"
 	"github.com/go-pg/pg"
@@ -12,14 +13,30 @@ type UserRepo struct {
 	DB *pg.DB
 }
 
-func (u *UserRepo) GetUserByID(ctx context.Context, id string) (*models.User, error) {
+func (u *UserRepo) GetUsers(ctx context.Context) ([]*models.User, error) {
+	var users []*models.User
+	err := u.DB.Model(&users).Order("id").Select()
+	if err != nil {
+		return []*models.User{}, errs.Internal(ctx)
+	}
+	return users, nil
+}
+
+func (u *UserRepo) GetUserByID(ctx context.Context, id *string) (*models.User, error) {
 	user := &models.User{}
+
+	if id == nil {
+		return nil, errs.BadInput(ctx) // TODO: move it to data validation module
+	}
+
 	err := u.DB.Model(user).Where("id = ?", id).First()
 	if err != nil {
-		return nil, errs.ErrEmpty(ctx)
+		return nil, errs.NotFound(ctx)
 	}
+
 	return user, nil
 }
+
 func (u *UserRepo) GetUserByEmail(email string) (*models.User, error) {
 	user := &models.User{}
 	err := u.DB.Model(user).Where("email = ?", email).First()
@@ -46,4 +63,36 @@ func (u *UserRepo) GetUsersByIDs(ids []string) ([]*models.User, []error) {
 		result[i] = uMap[id]
 	}
 	return result, nil
+}
+
+func (u *UserRepo) CreateUser(ctx context.Context, input models.NewUser) (*models.User, error) {
+	_, err := u.GetUserByEmail(input.Email)
+	if err == nil {
+		return nil, errs.Exists(ctx)
+	}
+
+	hash, err := auth.HashPasswd(input.Password)
+	if err != nil {
+		return nil, errs.BadInput(ctx)
+	}
+
+	user := &models.User{
+		Name:         input.Name,
+		Email:        input.Email,
+		PasswordHash: hash,
+	}
+
+	tx, err := u.DB.Begin()
+	if err != nil {
+		return nil, errs.Internal(ctx)
+	}
+	defer tx.Rollback()
+	if _, err := tx.Model(user).Returning("*").Insert(); err != nil {
+		return nil, errs.Internal(ctx)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, errs.Internal(ctx)
+	}
+
+	return user, err
 }

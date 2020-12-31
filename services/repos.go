@@ -5,7 +5,6 @@ import (
 )
 
 type repos struct {
-	ErrHandler
 	UserRepo
 	ArticleRepo
 	SettingRepo

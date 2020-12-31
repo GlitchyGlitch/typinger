@@ -9,7 +9,7 @@ import (
 )
 
 type repos interface {
-	GetUserByID(context.Context, string) (*models.User, error)
+	GetUserByID(context.Context, *string) (*models.User, error)
 }
 
 type contextKey string
@@ -40,7 +40,7 @@ func Middleware(rep repos) func(http.Handler) http.Handler {
 				return
 			}
 			// Check if not expired
-			user, err := rep.GetUserByID(r.Context(), id)
+			user, err := rep.GetUserByID(r.Context(), &id)
 			if err != nil {
 				next.ServeHTTP(w, r)
 				return

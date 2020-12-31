@@ -7,7 +7,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-func ErrForbidden(ctx context.Context) *gqlerror.Error {
+func Forbidden(ctx context.Context) *gqlerror.Error {
 	return &gqlerror.Error{
 		Path:    graphql.GetPath(ctx),
 		Message: "Operation forbidden.",
@@ -17,12 +17,42 @@ func ErrForbidden(ctx context.Context) *gqlerror.Error {
 	}
 }
 
-func ErrEmpty(ctx context.Context) *gqlerror.Error {
+func NotFound(ctx context.Context) *gqlerror.Error {
 	return &gqlerror.Error{
 		Path:    graphql.GetPath(ctx),
-		Message: "No data found in this path.", // TODO: check ortography
+		Message: "No data found.", // TODO: check ortography
 		Extensions: map[string]interface{}{
-			"code": "EMPTY",
+			"code": "NOT_FOUND",
+		},
+	}
+}
+
+func BadInput(ctx context.Context) *gqlerror.Error {
+	return &gqlerror.Error{
+		Path:    graphql.GetPath(ctx),
+		Message: "Input is invalid", // TODO: check ortography
+		Extensions: map[string]interface{}{
+			"code": "BAD_INPUT",
+		},
+	}
+}
+
+func Exists(ctx context.Context) *gqlerror.Error {
+	return &gqlerror.Error{
+		Path:    graphql.GetPath(ctx),
+		Message: "Resource already exists.", // TODO: check ortography
+		Extensions: map[string]interface{}{
+			"code": "EXISTS",
+		},
+	}
+}
+
+func Internal(ctx context.Context) *gqlerror.Error {
+	return &gqlerror.Error{
+		Path:    graphql.GetPath(ctx),
+		Message: "Internal server error.", // TODO: check ortography
+		Extensions: map[string]interface{}{
+			"code": "INTERNAL_ERROR",
 		},
 	}
 }

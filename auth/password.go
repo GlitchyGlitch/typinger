@@ -12,4 +12,4 @@ func HashPasswd(passwd string) (string, error) {
 func CheckPasswdHash(passwd, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(passwd))
 	return err == nil
-}
+} // TODO: create separate modeule for this.

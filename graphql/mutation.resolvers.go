@@ -7,11 +7,17 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/GlitchyGlitch/typinger/auth"
+	"github.com/GlitchyGlitch/typinger/errs"
 	"github.com/GlitchyGlitch/typinger/models"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input *models.NewUser) (*models.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	if !auth.Authorize(auth.FromContext(ctx)) {
+		return nil, errs.Forbidden(ctx)
+	}
+
+	return r.Repos.CreateUser(ctx, *input)
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input models.UpdateUser) (*models.User, error) {
@@ -23,7 +29,12 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 }
 
 func (r *mutationResolver) CreateArticle(ctx context.Context, input models.NewArticle) (*models.Article, error) {
-	return r.Repos.CreateArticle(&input)
+	user := auth.FromContext(ctx)
+	if !auth.Authorize(user) {
+		return nil, errs.Forbidden(ctx)
+	}
+
+	return r.Repos.CreateArticle(ctx, user, &input)
 }
 
 func (r *mutationResolver) UpdateArticle(ctx context.Context, id string, input models.UpdateArticle) (*models.Article, error) {
