@@ -77,7 +77,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Articles func(childComplexity int, filter *models.ArticleFilter, limit *int, offset *int) int
+		Articles func(childComplexity int, filter *models.ArticleFilter, first *int, offset *int) int
 		Images   func(childComplexity int, id *string) int
 		Settings func(childComplexity int, id *string) int
 		User     func(childComplexity int, id *string) int
@@ -118,7 +118,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	User(ctx context.Context, id *string) (*models.User, error)
-	Articles(ctx context.Context, filter *models.ArticleFilter, limit *int, offset *int) ([]*models.Article, error)
+	Articles(ctx context.Context, filter *models.ArticleFilter, first *int, offset *int) ([]*models.Article, error)
 	Settings(ctx context.Context, id *string) ([]*models.Setting, error)
 	Images(ctx context.Context, id *string) ([]*models.Image, error)
 }
@@ -375,7 +375,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Articles(childComplexity, args["filter"].(*models.ArticleFilter), args["limit"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Articles(childComplexity, args["filter"].(*models.ArticleFilter), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.images":
 		if e.complexity.Query.Images == nil {
@@ -605,7 +605,7 @@ input UpdateImage {
 }`, BuiltIn: false},
 	{Name: "graphql/schema/query.graphqls", Input: `type Query {
   user(id: ID): User!
-  articles(filter: ArticleFilter, limit: Int = 10, offset: Int = 0): [Article!]!
+  articles(filter: ArticleFilter, first: Int = 10, offset: Int = 0): [Article!]!
   settings(id: ID): [Setting!]!
   images(id: ID): [Image!]!
 }
@@ -924,14 +924,14 @@ func (ec *executionContext) field_Query_articles_args(ctx context.Context, rawAr
 	}
 	args["filter"] = arg0
 	var arg1 *int
-	if tmp, ok := rawArgs["limit"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
 		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["limit"] = arg1
+	args["first"] = arg1
 	var arg2 *int
 	if tmp, ok := rawArgs["offset"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("offset"))
@@ -1962,7 +1962,7 @@ func (ec *executionContext) _Query_articles(ctx context.Context, field graphql.C
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Articles(rctx, args["filter"].(*models.ArticleFilter), args["limit"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().Articles(rctx, args["filter"].(*models.ArticleFilter), args["first"].(*int), args["offset"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

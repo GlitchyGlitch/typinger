@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/GlitchyGlitch/typinger/auth"
+	"github.com/GlitchyGlitch/typinger/crypto"
 	"github.com/GlitchyGlitch/typinger/models"
 
 	"github.com/go-pg/pg"
@@ -19,7 +20,7 @@ func (a *AuthRepo) Authenticate(login models.LoginInput) (string, error) {
 		return "", err // TODO: handle this error properly
 	}
 
-	if ok := auth.CheckPasswdHash(login.Password, user.PasswordHash); !ok {
+	if ok := crypto.CheckPasswdHash(login.Password, user.PasswordHash); !ok {
 		return "", err // TODO: handle this error properly
 	}
 	jwtStr, err := auth.Token(user.ID)

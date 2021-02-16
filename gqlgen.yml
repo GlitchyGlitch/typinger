@@ -83,5 +83,3 @@ models:
 
   LoginInput:
     model: github.com/GlitchyGlitch/typinger/models.LoginInput
-
-skip_validation: true

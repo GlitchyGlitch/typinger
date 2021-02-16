@@ -20,8 +20,8 @@ func (r *queryResolver) User(ctx context.Context, id *string) (*models.User, err
 	return r.Repos.GetUserByID(ctx, id)
 }
 
-func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilter, limit *int, offset *int) ([]*models.Article, error) {
-	return r.Repos.GetArticles(filter, *limit, *offset)
+func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilter, first *int, offset *int) ([]*models.Article, error) {
+	return r.Repos.GetArticles(ctx, filter, *first, *offset)
 }
 
 func (r *queryResolver) Settings(ctx context.Context, id *string) ([]*models.Setting, error) {

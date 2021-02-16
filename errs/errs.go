@@ -2,6 +2,8 @@ package errs
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -27,12 +29,12 @@ func NotFound(ctx context.Context) *gqlerror.Error {
 	}
 }
 
-func BadInput(ctx context.Context) *gqlerror.Error {
+func InvalidInput(ctx context.Context) *gqlerror.Error {
 	return &gqlerror.Error{
 		Path:    graphql.GetPath(ctx),
 		Message: "Input is invalid", // TODO: check ortography
 		Extensions: map[string]interface{}{
-			"code": "BAD_INPUT",
+			"code": "INVALID_INPUT",
 		},
 	}
 }
@@ -53,6 +55,15 @@ func Internal(ctx context.Context) *gqlerror.Error {
 		Message: "Internal server error.", // TODO: check ortography
 		Extensions: map[string]interface{}{
 			"code": "INTERNAL_ERROR",
+		},
+	}
+}
+func Validation(ctx context.Context, field string) *gqlerror.Error {
+	return &gqlerror.Error{
+		Path:    graphql.GetPath(ctx),
+		Message: fmt.Sprintf("%s field is invalid.", splitField(field)),
+		Extensions: map[string]interface{}{
+			"code": fmt.Sprintf("VALIDATION_ERROR_%s", strings.ToUpper(field)),
 		},
 	}
 }

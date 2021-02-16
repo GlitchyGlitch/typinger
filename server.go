@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/GlitchyGlitch/typinger/graphql"
 	"github.com/GlitchyGlitch/typinger/postgres"
 	"github.com/GlitchyGlitch/typinger/services"
+	"github.com/GlitchyGlitch/typinger/validator"
 
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
@@ -19,7 +19,7 @@ import (
 
 const defaultPort = "8080"
 
-func main() {
+func startServer(ip, port string) {
 	opt, err := pg.ParseURL(os.Getenv("POSTGRES_URL")) //TODO: Move it to config struct
 	if err != nil {
 		panic(err)
@@ -29,14 +29,10 @@ func main() {
 	defer DB.Close()
 	// DB.AddQueryHook(&postgres.DBLogger{})
 
-	port := os.Getenv("PORT") //TODO: Move it to config struct
-	if port == "" {
-		port = defaultPort
-	}
-
 	repos := services.NewRepos(DB)
+	errPresenter := graphql.ErrorPresenter()
 	router := chi.NewRouter()
-
+	valid := validator.New()
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"localhost:8080"}, //TODO: move it to config struct (loaded by variable)
 		AllowCredentials: true,
@@ -44,12 +40,14 @@ func main() {
 	router.Use(auth.Middleware(repos))
 	router.Use(dataloaders.Middleware(repos))
 
-	errPresenter := graphql.ErrorPresenter()
-	s := graphql.Server(repos, errPresenter)
+	h := graphql.Handler(repos, valid, errPresenter)
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	router.Handle("/query", s)
+	router.Handle("/graphql", h)
 
-	log.Printf("🚀 Server running on http://localhost:%s/", port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	http.ListenAndServe(ip+":"+port, router)
+}
+
+func main() {
+	startServer("localhost", "8080")
 }

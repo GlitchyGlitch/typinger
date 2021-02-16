@@ -4,15 +4,15 @@ import (
 	"github.com/go-pg/pg"
 )
 
-type repos struct {
+type Repos struct {
 	UserRepo
 	ArticleRepo
 	SettingRepo
 	AuthRepo
 }
 
-func NewRepos(DB *pg.DB) *repos {
-	repos := &repos{
+func NewRepos(DB *pg.DB) *Repos {
+	repos := &Repos{
 		UserRepo:    UserRepo{DB: DB},
 		ArticleRepo: ArticleRepo{DB: DB},
 		SettingRepo: SettingRepo{DB: DB},

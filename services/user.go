@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 
-	"github.com/GlitchyGlitch/typinger/auth"
+	"github.com/GlitchyGlitch/typinger/crypto"
 	"github.com/GlitchyGlitch/typinger/errs"
 	"github.com/GlitchyGlitch/typinger/models"
 	"github.com/go-pg/pg"
@@ -26,7 +26,7 @@ func (u *UserRepo) GetUserByID(ctx context.Context, id *string) (*models.User, e
 	user := &models.User{}
 
 	if id == nil {
-		return nil, errs.BadInput(ctx) // TODO: move it to data validation module
+		return nil, errs.InvalidInput(ctx) // TODO: move it to data validation module
 	}
 
 	err := u.DB.Model(user).Where("id = ?", id).First()
@@ -71,9 +71,9 @@ func (u *UserRepo) CreateUser(ctx context.Context, input models.NewUser) (*model
 		return nil, errs.Exists(ctx)
 	}
 
-	hash, err := auth.HashPasswd(input.Password)
+	hash, err := crypto.HashPasswd(input.Password)
 	if err != nil {
-		return nil, errs.BadInput(ctx)
+		return nil, errs.InvalidInput(ctx)
 	}
 
 	user := &models.User{

@@ -34,6 +34,10 @@ func (r *mutationResolver) CreateArticle(ctx context.Context, input models.NewAr
 		return nil, errs.Forbidden(ctx)
 	}
 
+	if ok := r.Validator.ValidateErrs(ctx, input); !ok {
+		return nil, nil
+	}
+
 	return r.Repos.CreateArticle(ctx, user, &input)
 }
 

@@ -32,24 +32,24 @@ func Middleware(rep repos) func(http.Handler) http.Handler {
 				return
 			}
 
-			//validate jwt token
+			// Validate jwt token and check if expired
 			tokenStr := header[7:]
 			id, err := parseToken(tokenStr)
 			if err != nil {
 				next.ServeHTTP(w, r) // TODO: Handle forbidden status properly here
 				return
 			}
-			// Check if not expired
+
+			// Check if user exists
 			user, err := rep.GetUserByID(r.Context(), &id)
 			if err != nil {
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			// put it in context
+			// Put it in context
 			ctx := context.WithValue(r.Context(), key, user)
 
-			// and call the next with our new context
 			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})

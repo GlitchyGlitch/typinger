@@ -14,7 +14,7 @@ type ArticleRepo struct {
 	errHandler ErrHandler
 }
 
-func (a *ArticleRepo) GetArticles(filter *models.ArticleFilter, limit, offset int) ([]*models.Article, error) {
+func (a *ArticleRepo) GetArticles(ctx context.Context, filter *models.ArticleFilter, first, offset int) ([]*models.Article, error) {
 	var articles []*models.Article
 
 	query := a.DB.Model(&articles).Order("id")
@@ -24,8 +24,8 @@ func (a *ArticleRepo) GetArticles(filter *models.ArticleFilter, limit, offset in
 			query.Where("title ILIKE ?", fmt.Sprintf("%%%s%%", *filter.Title))
 		}
 	}
-	if limit != 0 {
-		query.Limit(limit)
+	if first != 0 {
+		query.Limit(first)
 	}
 	if offset != 0 {
 		query.Offset(offset)
@@ -33,9 +33,11 @@ func (a *ArticleRepo) GetArticles(filter *models.ArticleFilter, limit, offset in
 
 	err := query.Select()
 	if err != nil {
-		return nil, a.errHandler.Error("internal")
+		return nil, errs.Internal(ctx)
 	}
-
+	if len(articles) == 0 {
+		return nil, errs.NotFound(ctx)
+	}
 	return articles, nil
 }
 
