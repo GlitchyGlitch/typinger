@@ -29,10 +29,3 @@ CREATE TABLE images (
   img BYTEA NOT NULL,
   PRIMARY KEY (id)
 );
-
-CREATE TABLE settings (
-  id UUID DEFAULT uuid_generate_v4(),
-  key VARCHAR(255) UNIQUE NOT NULL,
-  value TEXT NOT NULL,
-  PRIMARY KEY (id)
-);

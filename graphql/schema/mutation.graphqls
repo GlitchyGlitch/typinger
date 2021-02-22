@@ -9,11 +9,6 @@ type Mutation {
   updateArticle(id: ID!, input: UpdateArticle!): Article!
   deleteArticle(id: ID!): Boolean!
 
-  # Settings
-  createSetting(input: NewSetting): Setting!
-  updateSetting(id: ID!, input: UpdateSetting!): Setting!
-  deleteSetting(id: ID!): Boolean!
-
   # Images
   createImages(input: [NewImage!]!): [Image!]!
   UpdateImage(id: ID! input: UpdateImage!): Image!

@@ -14,7 +14,7 @@ var (
 func Token(id string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["id"] = id
+	claims["sub"] = id
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix() // TODO: Add as config to config struct
 	tokenStr, err := token.SignedString(secretKey)
 	if err != nil {
@@ -29,7 +29,7 @@ func parseToken(tokenStr string) (string, error) {
 		return secretKey, nil
 	})
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		id := claims["id"].(string)
+		id := claims["sub"].(string)
 		return id, nil
 	}
 	return "", err

@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"os"
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/GlitchyGlitch/typinger/config"
 	"github.com/GlitchyGlitch/typinger/test"
 	"github.com/shurcooL/graphql"
 	"github.com/stretchr/testify/require"
@@ -13,17 +14,16 @@ import (
 )
 
 func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
-	psqlURL := os.Getenv("POSTGRES_URL")
+	conf := config.New()
 	tdPath := "postgres/test_data"
 
-	test.MigrateTestData("down", psqlURL, tdPath)
-	test.MigrateTestData("up", psqlURL, tdPath)
-	defer test.MigrateTestData("down", psqlURL, tdPath)
-
-	go startServer("localhost", "8080")
+	test.RenewTestData(conf.DBURL, tdPath)
+	defer test.MigrateTestData("down", conf.DBURL, tdPath)
+	q := startServer(conf)
+	defer close(q)
 	time.Sleep(100 * time.Millisecond) // Wait for server startup
 
-	c := graphql.NewClient("http://localhost:8080/graphql", nil)
+	c := graphql.NewClient(fmt.Sprintf("http://%s/graphql", conf.Addr()), nil)
 
 	t.Run("Get all articles", func(t *testing.T) {
 		var query struct {
@@ -105,20 +105,22 @@ func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
 
 		require.Equal(t, "No data found.", err.Error())
 	})
+
 }
 
 func TestMutationArticlesAuthenticated(t *testing.T) {
-	psqlURL := os.Getenv("POSTGRES_URL")
+	conf := config.New()
 	tdPath := "postgres/test_data"
 
-	test.RenewTestData(psqlURL, tdPath)
-	defer test.MigrateTestData("down", psqlURL, tdPath)
+	test.RenewTestData(conf.DBURL, tdPath)
+	defer test.MigrateTestData("down", conf.DBURL, tdPath)
 
-	go startServer("localhost", "8080")
+	q := startServer(conf)
+	defer close(q)
 	time.Sleep(100 * time.Millisecond) // Wait for server startup
 
 	// Prepare http client for graphql client
-	loginClient := graphql.NewClient("http://localhost:8080/graphql", nil)
+	loginClient := graphql.NewClient(fmt.Sprintf("http://%s/graphql", conf.Addr()), nil)
 	var loginMut struct {
 		Login graphql.String `graphql:"login(input: {email: \"ritchie@gmail.com\", password:\"ritchie\"})"`
 	}
@@ -132,7 +134,7 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 	httpClient := oauth2.NewClient(context.Background(), src)
 
 	// Setup authenticated client
-	c := graphql.NewClient("http://localhost:8080/graphql", httpClient)
+	c := graphql.NewClient(fmt.Sprintf("http://%s/graphql", conf.Addr()), httpClient)
 
 	t.Run("Create article", func(t *testing.T) {
 		var mutation struct {
@@ -222,10 +224,13 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 }
 
 func TestMutationArticlesUnauthenticated(t *testing.T) {
-	go startServer("localhost", "8080")
+	conf := config.New()
+
+	q := startServer(conf)
+	defer close(q)
 	time.Sleep(100 * time.Millisecond) // Wait for server startup
 
-	c := graphql.NewClient("http://localhost:8080/graphql", nil)
+	c := graphql.NewClient(fmt.Sprintf("http://%s/graphql", conf.Addr()), nil)
 
 	t.Run("Forbid creating article", func(t *testing.T) {
 		var mutation struct {

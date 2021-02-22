@@ -62,31 +62,21 @@ type ComplexityRoot struct {
 	Mutation struct {
 		CreateArticle func(childComplexity int, input models.NewArticle) int
 		CreateImages  func(childComplexity int, input []*models.NewImage) int
-		CreateSetting func(childComplexity int, input *models.NewSetting) int
 		CreateUser    func(childComplexity int, input *models.NewUser) int
 		DeleteArticle func(childComplexity int, id string) int
 		DeleteImages  func(childComplexity int, ids []string) int
-		DeleteSetting func(childComplexity int, id string) int
 		DeleteUser    func(childComplexity int, id string) int
 		Login         func(childComplexity int, input models.LoginInput) int
 		RefreshToken  func(childComplexity int, input models.RefreshTokenInput) int
 		UpdateArticle func(childComplexity int, id string, input models.UpdateArticle) int
 		UpdateImage   func(childComplexity int, id string, input models.UpdateImage) int
-		UpdateSetting func(childComplexity int, id string, input models.UpdateSetting) int
 		UpdateUser    func(childComplexity int, id string, input models.UpdateUser) int
 	}
 
 	Query struct {
 		Articles func(childComplexity int, filter *models.ArticleFilter, first *int, offset *int) int
 		Images   func(childComplexity int, id *string) int
-		Settings func(childComplexity int, id *string) int
 		User     func(childComplexity int, id *string) int
-	}
-
-	Setting struct {
-		ID    func(childComplexity int) int
-		Key   func(childComplexity int) int
-		Value func(childComplexity int) int
 	}
 
 	User struct {
@@ -107,9 +97,6 @@ type MutationResolver interface {
 	CreateArticle(ctx context.Context, input models.NewArticle) (*models.Article, error)
 	UpdateArticle(ctx context.Context, id string, input models.UpdateArticle) (*models.Article, error)
 	DeleteArticle(ctx context.Context, id string) (bool, error)
-	CreateSetting(ctx context.Context, input *models.NewSetting) (*models.Setting, error)
-	UpdateSetting(ctx context.Context, id string, input models.UpdateSetting) (*models.Setting, error)
-	DeleteSetting(ctx context.Context, id string) (bool, error)
 	CreateImages(ctx context.Context, input []*models.NewImage) ([]*models.Image, error)
 	UpdateImage(ctx context.Context, id string, input models.UpdateImage) (*models.Image, error)
 	DeleteImages(ctx context.Context, ids []string) (bool, error)
@@ -119,7 +106,6 @@ type MutationResolver interface {
 type QueryResolver interface {
 	User(ctx context.Context, id *string) (*models.User, error)
 	Articles(ctx context.Context, filter *models.ArticleFilter, first *int, offset *int) ([]*models.Article, error)
-	Settings(ctx context.Context, id *string) ([]*models.Setting, error)
 	Images(ctx context.Context, id *string) ([]*models.Image, error)
 }
 type UserResolver interface {
@@ -221,18 +207,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateImages(childComplexity, args["input"].([]*models.NewImage)), true
 
-	case "Mutation.createSetting":
-		if e.complexity.Mutation.CreateSetting == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_createSetting_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.CreateSetting(childComplexity, args["input"].(*models.NewSetting)), true
-
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
 			break
@@ -268,18 +242,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteImages(childComplexity, args["ids"].([]string)), true
-
-	case "Mutation.deleteSetting":
-		if e.complexity.Mutation.DeleteSetting == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_deleteSetting_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.DeleteSetting(childComplexity, args["id"].(string)), true
 
 	case "Mutation.deleteUser":
 		if e.complexity.Mutation.DeleteUser == nil {
@@ -341,18 +303,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateImage(childComplexity, args["id"].(string), args["input"].(models.UpdateImage)), true
 
-	case "Mutation.updateSetting":
-		if e.complexity.Mutation.UpdateSetting == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updateSetting_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdateSetting(childComplexity, args["id"].(string), args["input"].(models.UpdateSetting)), true
-
 	case "Mutation.updateUser":
 		if e.complexity.Mutation.UpdateUser == nil {
 			break
@@ -389,18 +339,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Images(childComplexity, args["id"].(*string)), true
 
-	case "Query.settings":
-		if e.complexity.Query.Settings == nil {
-			break
-		}
-
-		args, err := ec.field_Query_settings_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Settings(childComplexity, args["id"].(*string)), true
-
 	case "Query.user":
 		if e.complexity.Query.User == nil {
 			break
@@ -412,27 +350,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.User(childComplexity, args["id"].(*string)), true
-
-	case "Setting.id":
-		if e.complexity.Setting.ID == nil {
-			break
-		}
-
-		return e.complexity.Setting.ID(childComplexity), true
-
-	case "Setting.key":
-		if e.complexity.Setting.Key == nil {
-			break
-		}
-
-		return e.complexity.Setting.Key(childComplexity), true
-
-	case "Setting.value":
-		if e.complexity.Setting.Value == nil {
-			break
-		}
-
-		return e.complexity.Setting.Value(childComplexity), true
 
 	case "User.articles":
 		if e.complexity.User.Articles == nil {
@@ -589,11 +506,6 @@ input UpdateImage {
   updateArticle(id: ID!, input: UpdateArticle!): Article!
   deleteArticle(id: ID!): Boolean!
 
-  # Settings
-  createSetting(input: NewSetting): Setting!
-  updateSetting(id: ID!, input: UpdateSetting!): Setting!
-  deleteSetting(id: ID!): Boolean!
-
   # Images
   createImages(input: [NewImage!]!): [Image!]!
   UpdateImage(id: ID! input: UpdateImage!): Image!
@@ -606,25 +518,9 @@ input UpdateImage {
 	{Name: "graphql/schema/query.graphqls", Input: `type Query {
   user(id: ID): User!
   articles(filter: ArticleFilter, first: Int = 10, offset: Int = 0): [Article!]!
-  settings(id: ID): [Setting!]!
   images(id: ID): [Image!]!
 }
 `, BuiltIn: false},
-	{Name: "graphql/schema/setting.graphqls", Input: `type Setting {
-  id: ID!
-  key: String!
-  value: String!
-}
-
-input NewSetting {
-  key: String!
-  value: String!
-}
-
-input UpdateSetting {
-  key: String!
-  value: String!
-}`, BuiltIn: false},
 	{Name: "graphql/schema/user.graphqls", Input: `type User {
   id: ID!
   name: String!
@@ -704,21 +600,6 @@ func (ec *executionContext) field_Mutation_createImages_args(ctx context.Context
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createSetting_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *models.NewSetting
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalONewSetting2ᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐNewSetting(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -761,21 +642,6 @@ func (ec *executionContext) field_Mutation_deleteImages_args(ctx context.Context
 		}
 	}
 	args["ids"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_deleteSetting_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
 	return args, nil
 }
 
@@ -840,30 +706,6 @@ func (ec *executionContext) field_Mutation_updateArticle_args(ctx context.Contex
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 		arg1, err = ec.unmarshalNUpdateArticle2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐUpdateArticle(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg1
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_updateSetting_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	var arg1 models.UpdateSetting
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg1, err = ec.unmarshalNUpdateSetting2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐUpdateSetting(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -945,21 +787,6 @@ func (ec *executionContext) field_Query_articles_args(ctx context.Context, rawAr
 }
 
 func (ec *executionContext) field_Query_images_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalOID2ᚖstring(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_settings_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *string
@@ -1559,132 +1386,6 @@ func (ec *executionContext) _Mutation_deleteArticle(ctx context.Context, field g
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_createSetting(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createSetting_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateSetting(rctx, args["input"].(*models.NewSetting))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*models.Setting)
-	fc.Result = res
-	return ec.marshalNSetting2ᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐSetting(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_updateSetting(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_updateSetting_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateSetting(rctx, args["id"].(string), args["input"].(models.UpdateSetting))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*models.Setting)
-	fc.Result = res
-	return ec.marshalNSetting2ᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐSetting(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_deleteSetting(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_deleteSetting_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteSetting(rctx, args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_createImages(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1979,48 +1680,6 @@ func (ec *executionContext) _Query_articles(ctx context.Context, field graphql.C
 	return ec.marshalNArticle2ᚕᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐArticleᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_settings(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_settings_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Settings(rctx, args["id"].(*string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*models.Setting)
-	fc.Result = res
-	return ec.marshalNSetting2ᚕᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐSettingᚄ(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Query_images(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2132,111 +1791,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Setting_id(ctx context.Context, field graphql.CollectedField, obj *models.Setting) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Setting",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Setting_key(ctx context.Context, field graphql.CollectedField, obj *models.Setting) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Setting",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Key, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Setting_value(ctx context.Context, field graphql.CollectedField, obj *models.Setting) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Setting",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Value, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
@@ -3586,34 +3140,6 @@ func (ec *executionContext) unmarshalInputNewImage(ctx context.Context, obj inte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputNewSetting(ctx context.Context, obj interface{}) (models.NewSetting, error) {
-	var it models.NewSetting
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "key":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
-			it.Key, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "value":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-			it.Value, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj interface{}) (models.NewUser, error) {
 	var it models.NewUser
 	var asMap = obj.(map[string]interface{})
@@ -3733,34 +3259,6 @@ func (ec *executionContext) unmarshalInputUpdateImage(ctx context.Context, obj i
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
 			it.File, err = ec.unmarshalOUpload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputUpdateSetting(ctx context.Context, obj interface{}) (models.UpdateSetting, error) {
-	var it models.UpdateSetting
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "key":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
-			it.Key, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "value":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-			it.Value, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3952,21 +3450,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "createSetting":
-			out.Values[i] = ec._Mutation_createSetting(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "updateSetting":
-			out.Values[i] = ec._Mutation_updateSetting(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "deleteSetting":
-			out.Values[i] = ec._Mutation_deleteSetting(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "createImages":
 			out.Values[i] = ec._Mutation_createImages(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -4046,20 +3529,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
-		case "settings":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_settings(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "images":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -4078,43 +3547,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var settingImplementors = []string{"Setting"}
-
-func (ec *executionContext) _Setting(ctx context.Context, sel ast.SelectionSet, obj *models.Setting) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, settingImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Setting")
-		case "id":
-			out.Values[i] = ec._Setting_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "key":
-			out.Values[i] = ec._Setting_key(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "value":
-			out.Values[i] = ec._Setting_value(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4625,57 +4057,6 @@ func (ec *executionContext) unmarshalNRefreshTokenInput2githubᚗcomᚋGlitchyGl
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSetting2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐSetting(ctx context.Context, sel ast.SelectionSet, v models.Setting) graphql.Marshaler {
-	return ec._Setting(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNSetting2ᚕᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐSettingᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Setting) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNSetting2ᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐSetting(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNSetting2ᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐSetting(ctx context.Context, sel ast.SelectionSet, v *models.Setting) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._Setting(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4698,11 +4079,6 @@ func (ec *executionContext) unmarshalNUpdateArticle2githubᚗcomᚋGlitchyGlitch
 
 func (ec *executionContext) unmarshalNUpdateImage2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐUpdateImage(ctx context.Context, v interface{}) (models.UpdateImage, error) {
 	res, err := ec.unmarshalInputUpdateImage(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNUpdateSetting2githubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐUpdateSetting(ctx context.Context, v interface{}) (models.UpdateSetting, error) {
-	res, err := ec.unmarshalInputUpdateSetting(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
@@ -5029,14 +4405,6 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return graphql.MarshalInt(*v)
-}
-
-func (ec *executionContext) unmarshalONewSetting2ᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐNewSetting(ctx context.Context, v interface{}) (*models.NewSetting, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputNewSetting(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalONewUser2ᚖgithubᚗcomᚋGlitchyGlitchᚋtypingerᚋmodelsᚐNewUser(ctx context.Context, v interface{}) (*models.NewUser, error) {

@@ -49,18 +49,6 @@ func (r *mutationResolver) DeleteArticle(ctx context.Context, id string) (bool, 
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) CreateSetting(ctx context.Context, input *models.NewSetting) (*models.Setting, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) UpdateSetting(ctx context.Context, id string, input models.UpdateSetting) (*models.Setting, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) DeleteSetting(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *mutationResolver) CreateImages(ctx context.Context, input []*models.NewImage) ([]*models.Image, error) {
 	panic(fmt.Errorf("not implemented"))
 }

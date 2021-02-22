@@ -19,6 +19,7 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.0.0
 	github.com/machinebox/graphql v0.2.2
+	github.com/pkg/errors v0.8.1
 	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a
 	github.com/stretchr/testify v1.6.1
 	github.com/vektah/dataloaden v0.3.0 // indirect

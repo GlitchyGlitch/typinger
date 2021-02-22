@@ -20,6 +20,7 @@ func New() *Validator {
 	}
 	return v
 }
+
 func (v Validator) ValidateErrs(ctx context.Context, s interface{}) bool {
 	err := v.Struct(s)
 	if err != nil {
@@ -28,6 +29,7 @@ func (v Validator) ValidateErrs(ctx context.Context, s interface{}) bool {
 	}
 	return true
 }
+
 func (v *Validator) AddErrs(ctx context.Context, err error) {
 	if err != nil {
 		for _, e := range err.(validator.ValidationErrors) {

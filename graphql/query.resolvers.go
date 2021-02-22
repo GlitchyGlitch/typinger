@@ -24,10 +24,6 @@ func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilt
 	return r.Repos.GetArticles(ctx, filter, *first, *offset)
 }
 
-func (r *queryResolver) Settings(ctx context.Context, id *string) ([]*models.Setting, error) {
-	return r.Repos.GetSettings()
-}
-
 func (r *queryResolver) Images(ctx context.Context, id *string) ([]*models.Image, error) {
 	panic(fmt.Errorf("not implemented"))
 }

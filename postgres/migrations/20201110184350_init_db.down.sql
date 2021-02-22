@@ -1,4 +1,3 @@
-DROP TABLE settings;
 DROP TABLE images;
 DROP TABLE articles;
 DROP TABLE users;

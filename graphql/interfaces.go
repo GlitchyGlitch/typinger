@@ -16,7 +16,5 @@ type repos interface {
 	GetUsersByIDs([]string) ([]*models.User, []error)
 	CreateUser(context.Context, models.NewUser) (*models.User, error)
 
-	GetSettings() ([]*models.Setting, error)
-
 	Authenticate(models.LoginInput) (string, error)
 }
