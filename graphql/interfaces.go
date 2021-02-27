@@ -11,9 +11,10 @@ type repos interface {
 	CreateArticle(context.Context, *models.User, *models.NewArticle) (*models.Article, error) // Pointer to NewArticle because of big Content field.
 	DeleteArticle(context.Context, string) (bool, error)
 	GetArticlesByUserIDs([]string) ([][]*models.Article, []error)
+
 	GetUserByID(context.Context, *string) (*models.User, error)
 	GetUsersByIDs([]string) ([]*models.User, []error)
 	CreateUser(context.Context, models.NewUser) (*models.User, error)
 
-	Authenticate(models.LoginInput) (string, error)
+	Authenticate(context.Context, models.LoginInput) (string, error)
 }

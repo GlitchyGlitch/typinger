@@ -9,6 +9,16 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func BadCredencials(ctx context.Context) *gqlerror.Error {
+	return &gqlerror.Error{
+		Path:    graphql.GetPath(ctx),
+		Message: "Email or password invalid.",
+		Extensions: map[string]interface{}{
+			"code": "BAD_CREDENCIALS",
+		},
+	}
+}
+
 func Forbidden(ctx context.Context) *gqlerror.Error {
 	return &gqlerror.Error{
 		Path:    graphql.GetPath(ctx),
