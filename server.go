@@ -67,7 +67,7 @@ func startServer(conf *config.Config) chan bool {
 			}
 		}()
 		<-quit
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) //TODO: Check if its safe and secure
 		defer cancel()
 		if err := srv.Shutdown(ctx); err != nil && err != http.ErrServerClosed {
 			panic(err)

@@ -42,7 +42,7 @@ func Middleware(rep repos) func(http.Handler) http.Handler {
 
 			// Check if user exists
 			user, err := rep.GetUserByID(r.Context(), &id)
-			if err != nil {
+			if err != nil || user == nil {
 				next.ServeHTTP(w, r)
 				return
 			}

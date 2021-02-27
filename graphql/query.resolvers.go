@@ -17,6 +17,10 @@ func (r *queryResolver) User(ctx context.Context, id *string) (*models.User, err
 		return nil, errs.Forbidden(ctx)
 	}
 
+	if ok := r.Validator.CheckUUID(ctx, *id); !ok {
+		return nil, nil
+	}
+
 	return r.Repos.GetUserByID(ctx, id)
 }
 

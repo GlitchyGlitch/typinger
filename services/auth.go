@@ -9,8 +9,7 @@ import (
 )
 
 type AuthRepo struct {
-	DB         *pg.DB
-	errHandler ErrHandler
+	DB *pg.DB
 }
 
 func (a *AuthRepo) Authenticate(login models.LoginInput) (string, error) {

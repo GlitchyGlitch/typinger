@@ -6,3 +6,4 @@ TODO: Pass context to services.
 TODO: Add bad credentials error to login
 TODO: Check if token is expired jwt
 TODO: Check if error presenter is necessary
+TODO: Move not found errors to errs.Add funcs, because no data is returned now.

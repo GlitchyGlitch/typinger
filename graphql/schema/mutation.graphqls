@@ -1,6 +1,6 @@
 type Mutation {
   # Users
-  createUser(input: NewUser): User!
+  createUser(input: NewUser!): User!
   updateUser(id: ID!, input: UpdateUser!): User!
   deleteUser(id: ID!): Boolean!
   
@@ -16,5 +16,4 @@ type Mutation {
 
   # Authentication
   login(input: LoginInput!): String!
-  refreshToken(input: RefreshTokenInput!): String!
 }

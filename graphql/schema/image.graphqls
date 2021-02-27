@@ -1,9 +1,9 @@
 scalar Upload
 
 type Image {
-  id: ID!
-  name: String!
-  url: String!
+  id: ID
+  name: String
+  url: String
 }
 
 input NewImage {

@@ -5,8 +5,8 @@ import (
 
 	"github.com/GlitchyGlitch/typinger/errs"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/go-playground/validator"
+	"github.com/google/uuid"
 )
 
 type Validator struct {
@@ -33,7 +33,16 @@ func (v Validator) ValidateErrs(ctx context.Context, s interface{}) bool {
 func (v *Validator) AddErrs(ctx context.Context, err error) {
 	if err != nil {
 		for _, e := range err.(validator.ValidationErrors) {
-			graphql.AddError(ctx, errs.Validation(ctx, e.Field()))
+			errs.Add(ctx, errs.Validation(ctx, e.Field()))
 		}
 	}
+}
+
+func (v *Validator) CheckUUID(ctx context.Context, u string) bool {
+	_, err := uuid.Parse(u)
+	if err != nil {
+		errs.Add(ctx, errs.Validation(ctx, "id"))
+		return false
+	}
+	return true
 }

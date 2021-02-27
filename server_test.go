@@ -103,7 +103,8 @@ func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
 		}
 		err := c.Query(context.Background(), &query, nil)
 
-		require.Equal(t, "No data found.", err.Error())
+		require.NoError(t, err)
+		require.Len(t, query.Articles, 0)
 	})
 
 }

@@ -1,9 +1,9 @@
 type Article {
-  id: ID!
-  title: String!
-  content: String!
-  thumbnailUrl: String!
-  author: User!
+  id: ID
+  title: String
+  content: String
+  thumbnailUrl: String
+  author: User
 }
 
 input NewArticle {

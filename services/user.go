@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/GlitchyGlitch/typinger/crypto"
 	"github.com/GlitchyGlitch/typinger/errs"
@@ -13,38 +14,36 @@ type UserRepo struct {
 	DB *pg.DB
 }
 
-func (u *UserRepo) GetUsers(ctx context.Context) ([]*models.User, error) {
-	var users []*models.User
-	err := u.DB.Model(&users).Order("id").Select()
-	if err != nil {
-		return []*models.User{}, errs.Internal(ctx)
-	}
-	return users, nil
-}
-
 func (u *UserRepo) GetUserByID(ctx context.Context, id *string) (*models.User, error) {
 	user := &models.User{}
 
-	if id == nil {
-		return nil, errs.InvalidInput(ctx) // TODO: move it to data validation module
-	}
-
 	err := u.DB.Model(user).Where("id = ?", id).First()
+	if err == pg.ErrNoRows {
+		errs.Add(ctx, errs.NotFound(ctx))
+		return nil, nil
+	}
 	if err != nil {
-		return nil, errs.NotFound(ctx)
+		fmt.Println(err.Error())
+		return nil, errs.Internal(ctx)
 	}
 
 	return user, nil
 }
 
-func (u *UserRepo) GetUserByEmail(email string) (*models.User, error) {
+func (u *UserRepo) GetUserByEmail(ctx context.Context, email string) (*models.User, error) { // TODO: add validation
 	user := &models.User{}
 	err := u.DB.Model(user).Where("email = ?", email).First()
-
+	if user == nil {
+		errs.Add(ctx, errs.NotFound(ctx))
+		return nil, nil
+	}
+	if err != nil {
+		return nil, errs.Internal(ctx)
+	}
 	return user, err
 }
 
-func (u *UserRepo) GetUsersByIDs(ids []string) ([]*models.User, []error) {
+func (u *UserRepo) GetUsersByIDs(ids []string) ([]*models.User, []error) { //TODO: Add not found error
 	var users []*models.User
 
 	err := u.DB.Model(&users).Where("id in (?)", pg.In(ids)).Select()
@@ -66,8 +65,8 @@ func (u *UserRepo) GetUsersByIDs(ids []string) ([]*models.User, []error) {
 }
 
 func (u *UserRepo) CreateUser(ctx context.Context, input models.NewUser) (*models.User, error) {
-	_, err := u.GetUserByEmail(input.Email)
-	if err == nil {
+	usr, err := u.GetUserByEmail(ctx, input.Email)
+	if err == nil || usr != nil {
 		return nil, errs.Exists(ctx)
 	}
 

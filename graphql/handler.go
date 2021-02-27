@@ -21,6 +21,6 @@ func newSchema(rep repos, valid *validator.Validator, ep graphql.ErrorPresenterF
 
 func Handler(rep repos, validate *validator.Validator, ep graphql.ErrorPresenterFunc) http.Handler {
 	s := handler.NewDefaultServer(newSchema(rep, validate, ep))
-	s.SetErrorPresenter(ErrorPresenter()) // TODO: move it to server.go somehow
+	// s.SetErrorPresenter(ErrorPresenter()) // TODO: move it to server.go somehow
 	return s
 }

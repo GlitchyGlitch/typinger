@@ -58,6 +58,7 @@ func Internal(ctx context.Context) *gqlerror.Error {
 		},
 	}
 }
+
 func Validation(ctx context.Context, field string) *gqlerror.Error {
 	return &gqlerror.Error{
 		Path:    graphql.GetPath(ctx),
