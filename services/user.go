@@ -93,5 +93,5 @@ func (u *UserRepo) CreateUser(ctx context.Context, input models.NewUser) (*model
 		return nil, errs.Internal(ctx)
 	}
 
-	return user, err
+	return user, nil
 }

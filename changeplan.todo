@@ -3,5 +3,6 @@ TODO: Use context for repositories
 TODO: Create config struct to handle configuration
 TODO: remove service.Repos and make different interfaces
 TODO: Pass context to services.
-TODO: Add bad credentials error to login
 TODO: Check if error presenter is necessary
+TODO: Check typenames in tests
+TODO: Put easier easier to debug data to tests

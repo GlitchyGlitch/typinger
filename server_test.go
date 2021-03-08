@@ -13,7 +13,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
+func TestQueryArticles(t *testing.T) {
 	conf := config.New()
 	tdPath := "postgres/test_data"
 
@@ -28,6 +28,7 @@ func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
 	t.Run("Get all articles", func(t *testing.T) {
 		var query struct {
 			Articles []struct {
+				Typename     graphql.String `graphql:"__typename"`
 				ID           graphql.String
 				Title        graphql.String
 				Content      graphql.String
@@ -38,16 +39,19 @@ func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
 
 		require.NoError(t, err)
 
+		require.Equal(t, "Article", string(query.Articles[0].Typename))
 		require.Equal(t, "82ba242e-e853-499f-8873-f271c53aca6a", string(query.Articles[0].ID))
 		require.Equal(t, "Post about awsomeness of Go", string(query.Articles[0].Title))
 		require.Equal(t, "Go is awsome.", string(query.Articles[0].Content))
 		require.Equal(t, "http://www.example.com/path/to/photo0.jpg", string(query.Articles[0].ThumbnailURL))
 
+		require.Equal(t, "Article", string(query.Articles[1].Typename))
 		require.Equal(t, "c3eec2ac-0fd5-41ce-829a-6f3dd74cd102", string(query.Articles[1].ID))
 		require.Equal(t, "Very important article about programming", string(query.Articles[1].Title))
 		require.Equal(t, "Very important contetnt of article.", string(query.Articles[1].Content))
 		require.Equal(t, "http://www.example.com/path/to/photo1.jpg", string(query.Articles[1].ThumbnailURL))
 
+		require.Equal(t, "Article", string(query.Articles[1].Typename))
 		require.Equal(t, "d50f5d60-6f59-4605-96b8-a96b9e9b17ea", string(query.Articles[2].ID))
 		require.Equal(t, "Lorem ipsum article", string(query.Articles[2].Title))
 		require.Equal(t, "Lorem ipsum dolor sit amet.", string(query.Articles[2].Content))
@@ -57,6 +61,7 @@ func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
 	t.Run("Get specified page of articles", func(t *testing.T) {
 		var query struct {
 			Articles []struct {
+				Typename     graphql.String `graphql:"__typename"`
 				ID           graphql.String
 				Title        graphql.String
 				Content      graphql.String
@@ -67,6 +72,7 @@ func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
 
 		require.NoError(t, err)
 
+		require.Equal(t, "Article", string(query.Articles[0].Typename))
 		require.Equal(t, "d50f5d60-6f59-4605-96b8-a96b9e9b17ea", string(query.Articles[0].ID))
 		require.Equal(t, "Lorem ipsum article", string(query.Articles[0].Title))
 		require.Equal(t, "Lorem ipsum dolor sit amet.", string(query.Articles[0].Content))
@@ -76,6 +82,7 @@ func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
 	t.Run("Get articles specified by filter", func(t *testing.T) {
 		var query struct {
 			Articles []struct {
+				Typename     graphql.String `graphql:"__typename"`
 				ID           graphql.String
 				Title        graphql.String
 				Content      graphql.String
@@ -85,6 +92,8 @@ func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
 		err := c.Query(context.Background(), &query, nil)
 
 		require.NoError(t, err)
+
+		require.Equal(t, "Article", string(query.Articles[0].Typename))
 		require.Equal(t, "d50f5d60-6f59-4605-96b8-a96b9e9b17ea", string(query.Articles[0].ID))
 		require.Equal(t, "Lorem ipsum article", string(query.Articles[0].Title))
 		require.Equal(t, "Lorem ipsum dolor sit amet.", string(query.Articles[0].Content))
@@ -95,6 +104,7 @@ func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
 	t.Run("No matches to filter", func(t *testing.T) {
 		var query struct {
 			Articles []struct {
+				Typename     graphql.String `graphql:"__typename"`
 				ID           graphql.String
 				Title        graphql.String
 				Content      graphql.String
@@ -106,7 +116,44 @@ func TestQueryArticles(t *testing.T) { //TODO: chceck typenames
 		require.NoError(t, err)
 		require.Len(t, query.Articles, 0)
 	})
+}
 
+func TestMutationArticles(t *testing.T) {
+	conf := config.New()
+	tdPath := "postgres/test_data"
+
+	test.RenewTestData(conf.DBURL, tdPath)
+	defer test.MigrateTestData("down", conf.DBURL, tdPath)
+	q := startServer(conf)
+	defer close(q)
+	time.Sleep(100 * time.Millisecond) // Wait for server startup
+
+	c := graphql.NewClient(fmt.Sprintf("http://%s/graphql", conf.Addr()), nil)
+
+	t.Run("Creating artcile forbidden", func(t *testing.T) {
+		var mutation struct {
+			Article struct {
+				Typename     graphql.String `graphql:"__typename"`
+				ID           graphql.String
+				Title        graphql.String
+				Content      graphql.String
+				ThumbnailURL graphql.String
+			} `graphql:"createArticle(input: {title:\"Artcile created as test\", content:\"Nothing important here.\", thumbnailUrl:\"http://www.example.com/path/to/photo3.jpg\"})"`
+		}
+		err := c.Mutate(context.Background(), &mutation, nil)
+
+		require.Equal(t, "Operation forbidden.", err.Error())
+	})
+
+	t.Run("Deleting artcile forbidden", func(t *testing.T) {
+		var mutation struct {
+			Deleted bool `graphql:"deleteArticle(id:\"d50f5d60-6f59-4605-96b8-a96b9e9b17ea\")"`
+		}
+		err := c.Mutate(context.Background(), &mutation, nil)
+
+		require.Equal(t, "Operation forbidden.", err.Error())
+		require.False(t, mutation.Deleted)
+	})
 }
 
 func TestMutationArticlesAuthenticated(t *testing.T) {
@@ -140,6 +187,7 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 	t.Run("Create article", func(t *testing.T) {
 		var mutation struct {
 			Article struct {
+				Typename     graphql.String `graphql:"__typename"`
 				ID           graphql.String
 				Title        graphql.String
 				Content      graphql.String
@@ -149,6 +197,7 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 		err := c.Mutate(context.Background(), &mutation, nil)
 
 		require.NoError(t, err)
+		require.Equal(t, "Article", string(mutation.Article.Typename))
 		require.True(t, test.IsValidUUID(string(mutation.Article.ID)))
 		require.Equal(t, "Artcile created as test", string(mutation.Article.Title))
 		require.Equal(t, "Nothing important here.", string(mutation.Article.Content))
@@ -158,6 +207,7 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 	t.Run("Create two same articles", func(t *testing.T) {
 		var mutation struct {
 			Article struct {
+				Typename     graphql.String `graphql:"__typename"`
 				ID           graphql.String
 				Title        graphql.String
 				Content      graphql.String
@@ -174,6 +224,7 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 	t.Run("Create article with no title", func(t *testing.T) {
 		var mutation struct {
 			Article struct {
+				Typename     graphql.String `graphql:"__typename"`
 				ID           graphql.String
 				Title        graphql.String
 				Content      graphql.String
@@ -187,6 +238,7 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 	t.Run("Create article with no content", func(t *testing.T) {
 		var mutation struct {
 			Article struct {
+				Typename     graphql.String `graphql:"__typename"`
 				ID           graphql.String
 				Title        graphql.String
 				Content      graphql.String
@@ -200,6 +252,7 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 	t.Run("Create article with invalid thumbnailUrl", func(t *testing.T) {
 		var mutation struct {
 			Article struct {
+				Typename     graphql.String `graphql:"__typename"`
 				ID           graphql.String
 				Title        graphql.String
 				Content      graphql.String
@@ -213,6 +266,7 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 	t.Run("Create article with no thumbnailUrl", func(t *testing.T) {
 		var mutation struct {
 			Article struct {
+				Typename     graphql.String `graphql:"__typename"`
 				ID           graphql.String
 				Title        graphql.String
 				Content      graphql.String
@@ -222,29 +276,130 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 		err := c.Mutate(context.Background(), &mutation, nil)
 		require.Equal(t, "Thumbnail URL field is invalid.", err.Error())
 	})
+
+	t.Run("Delete article", func(t *testing.T) {
+		var mutation struct {
+			Deleted graphql.Boolean `graphql:"deleteArticle(id:\"82ba242e-e853-499f-8873-f271c53aca6a\")"`
+		}
+		err := c.Mutate(context.Background(), &mutation, nil)
+		require.NoError(t, err)
+		require.True(t, bool(mutation.Deleted))
+	})
+
+	t.Run("Delete article not found", func(t *testing.T) {
+		var mutation struct {
+			Deleted graphql.Boolean `graphql:"deleteArticle(id:\"e5f1c9af-fa8a-4a58-9909-d887ddf7e961\")"`
+		}
+		err := c.Mutate(context.Background(), &mutation, nil)
+		require.Equal(t, "No data found.", err.Error())
+		require.False(t, bool(mutation.Deleted))
+	})
+
+	t.Run("Delete article invalid id", func(t *testing.T) {
+		var mutation struct {
+			Deleted graphql.Boolean `graphql:"deleteArticle(id:\"NotAUUID\")"`
+		}
+		err := c.Mutate(context.Background(), &mutation, nil)
+		require.Equal(t, "ID field is invalid.", err.Error())
+		require.False(t, bool(mutation.Deleted))
+	})
 }
 
-func TestMutationArticlesUnauthenticated(t *testing.T) {
+func TestQueryUsers(t *testing.T) {
 	conf := config.New()
+	tdPath := "postgres/test_data"
 
+	test.RenewTestData(conf.DBURL, tdPath)
+	defer test.MigrateTestData("down", conf.DBURL, tdPath)
 	q := startServer(conf)
 	defer close(q)
 	time.Sleep(100 * time.Millisecond) // Wait for server startup
 
 	c := graphql.NewClient(fmt.Sprintf("http://%s/graphql", conf.Addr()), nil)
 
-	t.Run("Forbid creating article", func(t *testing.T) {
-		var mutation struct {
-			Article struct {
-				ID           graphql.String
-				Title        graphql.String
-				Content      graphql.String
-				ThumbnailURL graphql.String
-			} `graphql:"createArticle(input: {title:\"Artcile created as test\", content:\"Nothing important here.\", thumbnailUrl:\"http://www.example.com/path/to/photo3.jpg\"})"`
+	t.Run("Getting existing user by id forbidden", func(t *testing.T) {
+		var query struct {
+			User struct {
+				Typename graphql.String `graphql:"__typename"`
+				ID       graphql.String
+				Name     graphql.String
+				Email    graphql.String
+			} `graphql:"user(id:\"e5f1c9af-fa8a-4a58-9909-d887ddf7e961\")"`
 		}
-		err := c.Mutate(context.Background(), &mutation, nil)
-
+		err := c.Query(context.Background(), &query, nil)
 		require.Equal(t, "Operation forbidden.", err.Error())
+	})
 
+	t.Run("Getting nonexistent user by id forbidden", func(t *testing.T) {
+		var query struct {
+			User struct {
+				Typename graphql.String `graphql:"__typename"`
+				ID       graphql.String
+				Name     graphql.String
+				Email    graphql.String
+			} `graphql:"user(id:\"8113ee45-18ea-47ec-b06c-300fae1c9ed9\")"`
+		}
+		err := c.Query(context.Background(), &query, nil)
+		require.Equal(t, "Operation forbidden.", err.Error())
+	})
+	t.Run("Getting user by invalid id forbidden", func(t *testing.T) {
+		var query struct {
+			User struct {
+				Typename graphql.String `graphql:"__typename"`
+				ID       graphql.String
+				Name     graphql.String
+				Email    graphql.String
+			} `graphql:"user(id:\"8113ee45-18ea-47ec-b06c\")"`
+		}
+		err := c.Query(context.Background(), &query, nil)
+		require.Equal(t, "Operation forbidden.", err.Error())
+	})
+}
+
+func TestQueryUsersAuthenticated(t *testing.T) {
+	conf := config.New()
+	tdPath := "postgres/test_data"
+
+	test.RenewTestData(conf.DBURL, tdPath)
+	defer test.MigrateTestData("down", conf.DBURL, tdPath)
+
+	q := startServer(conf)
+	defer close(q)
+	time.Sleep(100 * time.Millisecond) // Wait for server startup
+
+	// Prepare http client for graphql client
+	loginClient := graphql.NewClient(fmt.Sprintf("http://%s/graphql", conf.Addr()), nil)
+	var loginMut struct {
+		Login graphql.String `graphql:"login(input: {email: \"ritchie@gmail.com\", password:\"ritchie\"})"`
+	}
+	err := loginClient.Mutate(context.Background(), &loginMut, nil)
+	if err != nil {
+		panic(err)
+	}
+	src := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: string(loginMut.Login)},
+	)
+	httpClient := oauth2.NewClient(context.Background(), src)
+
+	// Setup authenticated client
+	c := graphql.NewClient(fmt.Sprintf("http://%s/graphql", conf.Addr()), httpClient)
+
+	t.Run("Getting user by id", func(t *testing.T) {
+		var query struct {
+			User struct {
+				Typename graphql.String `graphql:"__typename"`
+				ID       graphql.String
+				Name     graphql.String
+				Email    graphql.String
+			} `graphql:"user(id:\"d1451907-e1ec-4291-ab14-a9a314b56b6a\")"`
+		}
+		err := c.Query(context.Background(), &query, nil)
+
+		require.NoError(t, err)
+
+		require.Equal(t, "User", string(query.User.Typename))
+		require.Equal(t, "d1451907-e1ec-4291-ab14-a9a314b56b6a", string(query.User.ID))
+		require.Equal(t, "Guido van Rossum", string(query.User.Name))
+		require.Equal(t, "rossum@gmail.com", string(query.User.Email))
 	})
 }

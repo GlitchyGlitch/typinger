@@ -4,7 +4,13 @@ import (
 	"github.com/fatih/camelcase"
 )
 
-func splitField(field string) string {
+func transformField(field string) string {
+	hardTransforms := map[string]string{"id": "ID"}
+	value, ok := hardTransforms[field]
+	if ok {
+		return value
+	}
+
 	fieldForMsg := ""
 
 	fieldWords := camelcase.Split(field)

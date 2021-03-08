@@ -9,6 +9,7 @@ import (
 type repos interface {
 	GetArticles(context.Context, *models.ArticleFilter, int, int) ([]*models.Article, error)
 	CreateArticle(context.Context, *models.User, *models.NewArticle) (*models.Article, error) // Pointer to NewArticle because of big Content field.
+	UpdateArticle(context.Context, string, models.UpdateArticle) (*models.Article, error)
 	DeleteArticle(context.Context, string) (bool, error)
 	GetArticlesByUserIDs([]string) ([][]*models.Article, []error)
 

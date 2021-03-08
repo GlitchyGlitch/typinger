@@ -52,7 +52,7 @@ func (a *ArticleRepo) GetArticlesByUserIDs(ids []string) ([][]*models.Article, [
 		return nil, []error{} // TODO: error hereDelete()
 	}
 	if len(articles) == 0 {
-		return result, []error{} //handle errs not found here
+		return result, []error{}
 	}
 	for _, article := range articles {
 		aMap[article.Author] = append(aMap[article.Author], article)
@@ -74,6 +74,10 @@ func (a *ArticleRepo) CreateArticle(ctx context.Context, user *models.User, inpu
 		return nil, errs.Exists(ctx)
 	}
 	return article, nil
+}
+
+func (a *ArticleRepo) UpdateArticle(ctx context.Context, id string, input models.UpdateArticle) (*models.Article, error) {
+	return nil, nil
 }
 
 func (a *ArticleRepo) DeleteArticle(ctx context.Context, id string) (bool, error) {

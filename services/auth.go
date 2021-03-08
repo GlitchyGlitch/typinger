@@ -32,7 +32,7 @@ func (a *AuthRepo) Authenticate(ctx context.Context, login models.LoginInput) (s
 	}
 	jwtStr, err := auth.Token(user.ID)
 	if err != nil {
-		return "", errs.Internal(ctx) // TODO: handle this error properly
+		return "", errs.Internal(ctx)
 	}
 	return jwtStr, err
 }

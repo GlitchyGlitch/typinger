@@ -72,7 +72,7 @@ func Internal(ctx context.Context) *gqlerror.Error {
 func Validation(ctx context.Context, field string) *gqlerror.Error {
 	return &gqlerror.Error{
 		Path:    graphql.GetPath(ctx),
-		Message: fmt.Sprintf("%s field is invalid.", splitField(field)),
+		Message: fmt.Sprintf("%s field is invalid.", transformField(field)),
 		Extensions: map[string]interface{}{
 			"code": fmt.Sprintf("VALIDATION_ERROR_%s", strings.ToUpper(field)),
 		},

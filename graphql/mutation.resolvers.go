@@ -54,7 +54,7 @@ func (r *mutationResolver) DeleteArticle(ctx context.Context, id string) (bool, 
 	if ok := r.Validator.CheckUUID(ctx, id); !ok {
 		return false, nil
 	}
-	// TODO: implement delete
+
 	return r.Repos.DeleteArticle(ctx, id)
 }
 
