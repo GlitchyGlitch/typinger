@@ -49,7 +49,7 @@ func (a *ArticleRepo) GetArticlesByUserIDs(ids []string) ([][]*models.Article, [
 	err := a.DB.Model(&articles).Where("author in (?)", pg.In(ids)).Order("author").Select()
 
 	if err != nil {
-		return nil, []error{} // TODO: error hereDelete()
+		return nil, []error{} // TODO: internal error here
 	}
 	if len(articles) == 0 {
 		return result, []error{}
