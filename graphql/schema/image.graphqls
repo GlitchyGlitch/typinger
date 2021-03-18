@@ -3,17 +3,17 @@ scalar Upload
 type Image {
   id: ID
   name: String
-  url: String
+  slug: String
 }
 
 input NewImage {
   name: String!
-  url: String!
+  slug: String!
   file: Upload!
 }
 
 input UpdateImage {
   name: String
-  url: String
+  slug: String
   file: Upload
 }

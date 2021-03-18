@@ -39,16 +39,6 @@ func NotFound(ctx context.Context) *gqlerror.Error {
 	}
 }
 
-func InvalidInput(ctx context.Context) *gqlerror.Error {
-	return &gqlerror.Error{
-		Path:    graphql.GetPath(ctx),
-		Message: "Input is invalid", // TODO: check ortography
-		Extensions: map[string]interface{}{
-			"code": "INVALID_INPUT",
-		},
-	}
-}
-
 func Exists(ctx context.Context) *gqlerror.Error {
 	return &gqlerror.Error{
 		Path:    graphql.GetPath(ctx),

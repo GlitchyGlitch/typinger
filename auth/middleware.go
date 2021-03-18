@@ -9,7 +9,7 @@ import (
 )
 
 type repos interface {
-	GetUserByID(context.Context, *string) (*models.User, error)
+	GetUserByID(context.Context, string) (*models.User, error)
 }
 
 type contextKey string
@@ -36,12 +36,12 @@ func Middleware(rep repos) func(http.Handler) http.Handler {
 			tokenStr := header[7:]
 			id, err := parseToken(tokenStr)
 			if err != nil {
-				next.ServeHTTP(w, r) // TODO: Handle forbidden status properly here
+				next.ServeHTTP(w, r)
 				return
 			}
 
 			// Check if user exists
-			user, err := rep.GetUserByID(r.Context(), &id)
+			user, err := rep.GetUserByID(r.Context(), id)
 			if err != nil || user == nil {
 				next.ServeHTTP(w, r)
 				return

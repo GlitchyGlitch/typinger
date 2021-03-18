@@ -17,11 +17,26 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.NewUser)
 		return nil, errs.Forbidden(ctx)
 	}
 
+	if ok := r.Validator.ValidateErrs(ctx, input, false); !ok {
+		return nil, nil
+	}
+
 	return r.Repos.CreateUser(ctx, input)
 }
 
 func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input models.UpdateUser) (*models.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	user := auth.FromContext(ctx)
+	if !auth.Authorize(user) {
+		return nil, errs.Forbidden(ctx)
+	}
+
+	if ok := r.Validator.CheckUUID(ctx, id); !ok {
+		return nil, nil
+	}
+	if ok := r.Validator.ValidateErrs(ctx, input, false); !ok {
+		return nil, nil
+	}
+	return r.Repos.UpdateUser(ctx, id, input)
 }
 
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, error) {
@@ -34,7 +49,7 @@ func (r *mutationResolver) CreateArticle(ctx context.Context, input models.NewAr
 		return nil, errs.Forbidden(ctx)
 	}
 
-	if ok := r.Validator.ValidateErrs(ctx, input); !ok {
+	if ok := r.Validator.ValidateErrs(ctx, input, false); !ok {
 		return nil, nil
 	}
 
@@ -42,7 +57,19 @@ func (r *mutationResolver) CreateArticle(ctx context.Context, input models.NewAr
 }
 
 func (r *mutationResolver) UpdateArticle(ctx context.Context, id string, input models.UpdateArticle) (*models.Article, error) {
-	panic(fmt.Errorf("not implemented"))
+	user := auth.FromContext(ctx)
+	if !auth.Authorize(user) {
+		return nil, errs.Forbidden(ctx)
+	}
+
+	if ok := r.Validator.CheckUUID(ctx, id); !ok {
+		return nil, nil
+	}
+	if ok := r.Validator.ValidateErrs(ctx, input, false); !ok {
+		return nil, nil
+	}
+
+	return r.Repos.UpdateArticle(ctx, id, input)
 }
 
 func (r *mutationResolver) DeleteArticle(ctx context.Context, id string) (bool, error) {

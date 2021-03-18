@@ -2,6 +2,7 @@ package validator
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/GlitchyGlitch/typinger/errs"
 
@@ -21,7 +22,10 @@ func New() *Validator {
 	return v
 }
 
-func (v Validator) ValidateErrs(ctx context.Context, s interface{}) bool {
+func (v Validator) ValidateErrs(ctx context.Context, s interface{}, canBeNil bool) bool {
+	if s == nil || (reflect.ValueOf(s).Kind() == reflect.Ptr && reflect.ValueOf(s).IsNil()) {
+		return canBeNil
+	}
 	err := v.Struct(s)
 	if err != nil {
 		v.AddErrs(ctx, err)
@@ -30,7 +34,7 @@ func (v Validator) ValidateErrs(ctx context.Context, s interface{}) bool {
 	return true
 }
 
-func (v *Validator) AddErrs(ctx context.Context, err error) {
+func (v Validator) AddErrs(ctx context.Context, err error) {
 	if err != nil {
 		for _, e := range err.(validator.ValidationErrors) {
 			errs.Add(ctx, errs.Validation(ctx, e.Field()))
@@ -38,7 +42,7 @@ func (v *Validator) AddErrs(ctx context.Context, err error) {
 	}
 }
 
-func (v *Validator) CheckUUID(ctx context.Context, u string) bool {
+func (v Validator) CheckUUID(ctx context.Context, u string) bool {
 	_, err := uuid.Parse(u)
 	if err != nil {
 		errs.Add(ctx, errs.Validation(ctx, "id"))

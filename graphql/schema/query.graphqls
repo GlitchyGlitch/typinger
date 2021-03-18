@@ -1,5 +1,5 @@
 type Query {
-  user(id: ID): User
+  users(filter: UserFilter, first: Int = 10, offset: Int = 0): [User]
   articles(filter: ArticleFilter, first: Int = 10, offset: Int = 0): [Article]
   images(id: ID): [Image]
 }

@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/GlitchyGlitch/typinger/auth"
@@ -28,7 +31,7 @@ func router(handler http.Handler, repos *services.Repos, config *config.Config) 
 	router.Use(auth.Middleware(repos))
 	router.Use(dataloaders.Middleware(repos))
 
-	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
 	router.Handle("/graphql", handler)
 	return router
 }
@@ -44,42 +47,44 @@ func httpServer(conf *config.Config, router *chi.Mux) *http.Server {
 	return srv
 }
 
-func startServer(conf *config.Config) chan bool {
-	quit := make(chan bool)
+func startServer(conf *config.Config) {
+	opt, err := pg.ParseURL(conf.DBURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	DB := postgres.New(opt)
+	defer DB.Close()
+	// DB.AddQueryHook(&postgres.DBLogger{})
+
+	repos := services.NewRepos(DB)
+	errPresenter := graphql.ErrorPresenter() // TODO: Make it works
+	v := validator.New()
+	handler := graphql.Handler(repos, v, errPresenter)
+	router := router(handler, repos, conf)
+	srv := httpServer(conf, router)
+
 	go func() {
-		opt, err := pg.ParseURL(conf.DBURL) //TODO: Move it to conf struct
-		if err != nil {
-			panic(err)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal(err)
 		}
-		DB := postgres.New(opt)
-		defer DB.Close()
-		// DB.AddQueryHook(&postgres.DBLogger{})
-
-		repos := services.NewRepos(DB)
-		errPresenter := graphql.ErrorPresenter() // TODO: Make it works
-		v := validator.New()
-		handler := graphql.Handler(repos, v, errPresenter)
-		router := router(handler, repos, conf)
-		srv := httpServer(conf, router)
-		go func() {
-			if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-				panic(err)
-			}
-		}()
-		<-quit
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) //TODO: Check if its safe and secure
-		defer cancel()
-		if err := srv.Shutdown(ctx); err != nil && err != http.ErrServerClosed {
-			panic(err)
-		}
-
 	}()
+	log.Printf("🚀 Server running on %s", conf.Addr())
 
-	return quit
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, os.Kill)
+
+	<-sigChan
+	log.Println("Shutting down...")
+
+	ctx, ctxCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer ctxCancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal(err)
+	}
+	return
 }
 
 func main() {
 	c := config.New()
 	startServer(c)
-	select {} // TODO: Add os signals support
 }

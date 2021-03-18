@@ -6,18 +6,18 @@ type Image struct {
 	ID      string `json:"id"`
 	Name    string `json:"name"`
 	Content string `json:"content"`
-	URL     string `json:"url"`
+	Slug    string `json:"slug"`
 }
 
 type NewImage struct {
 	ID   int            `json:"id"`
 	Name string         `json:"name"`
-	URL  string         `json:"url"`
+	Slug string         `json:"slug"`
 	File graphql.Upload `json:"file"`
 }
 
 type UpdateImage struct {
-	Name *string         `json:"name"`
-	URL  *string         `json:"url"`
-	File *graphql.Upload `json:"file"`
+	Name string         `json:"name"`
+	Slug string         `json:"slug"`
+	File graphql.Upload `json:"file"`
 }

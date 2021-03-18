@@ -57,11 +57,12 @@ models:
     fields:
       articles:
         resolver: true
+  UserFilter:
+    model: github.com/GlitchyGlitch/typinger/models.UserFilter
   NewUser:
     model: github.com/GlitchyGlitch/typinger/models.NewUser
   UpdateUser:
     model: github.com/GlitchyGlitch/typinger/models.UpdateUser
-
   Article:
     model: github.com/GlitchyGlitch/typinger/models.Article
     fields:
@@ -73,13 +74,7 @@ models:
     model: github.com/GlitchyGlitch/typinger/models.NewArticle
   UpdateArticle:
     model: github.com/GlitchyGlitch/typinger/models.UpdateArticle
-
-  Setting:
-    model: github.com/GlitchyGlitch/typinger/models.Setting
-  NewSetting:
-    model: github.com/GlitchyGlitch/typinger/models.NewSetting
-  UpdateSetting:
-    model: github.com/GlitchyGlitch/typinger/models.UpdateSetting
-
+  Image:
+    model: github.com/GlitchyGlitch/typinger/models.Image
   LoginInput:
     model: github.com/GlitchyGlitch/typinger/models.LoginInput

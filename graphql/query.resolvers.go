@@ -12,19 +12,21 @@ import (
 	"github.com/GlitchyGlitch/typinger/models"
 )
 
-func (r *queryResolver) User(ctx context.Context, id *string) (*models.User, error) {
-	if !auth.Authorize(auth.FromContext(ctx)) {
+func (r *queryResolver) Users(ctx context.Context, filter *models.UserFilter, first *int, offset *int) ([]*models.User, error) {
+	user := auth.FromContext(ctx)
+	if !auth.Authorize(user) {
 		return nil, errs.Forbidden(ctx)
 	}
-
-	if ok := r.Validator.CheckUUID(ctx, *id); !ok {
+	if ok := r.Validator.ValidateErrs(ctx, filter, true); !ok {
 		return nil, nil
 	}
-
-	return r.Repos.GetUserByID(ctx, id)
+	return r.Repos.GetUsers(ctx, filter, *first, *offset)
 }
 
 func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilter, first *int, offset *int) ([]*models.Article, error) {
+	if ok := r.Validator.ValidateErrs(ctx, filter, true); !ok {
+		return nil, nil
+	}
 	return r.Repos.GetArticles(ctx, filter, *first, *offset)
 }
 

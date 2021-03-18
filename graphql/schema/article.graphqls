@@ -13,9 +13,9 @@ input NewArticle {
 }
 
 input UpdateArticle {
-  title: String!
-  content: String!
-  thumbnailUrl: String!
+  title: String
+  content: String
+  thumbnailUrl: String
 }
 
 input ArticleFilter {

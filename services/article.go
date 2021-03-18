@@ -13,16 +13,27 @@ type ArticleRepo struct {
 	DB *pg.DB
 }
 
+func (a *ArticleRepo) GetArticleByID(ctx context.Context, id string) (*models.Article, error) {
+	article := &models.Article{}
+	err := a.DB.Model(article).Where("id = ?", id).First()
+	if err == pg.ErrNoRows {
+		return nil, errs.NotFound(ctx)
+	}
+	if err != nil {
+		return nil, errs.Internal(ctx)
+	}
+	return article, nil
+}
+
 func (a *ArticleRepo) GetArticles(ctx context.Context, filter *models.ArticleFilter, first, offset int) ([]*models.Article, error) {
 	var articles []*models.Article
 
 	query := a.DB.Model(&articles).Order("id")
 
-	if filter != nil {
-		if filter.Title != nil {
-			query.Where("title ILIKE ?", fmt.Sprintf("%%%s%%", *filter.Title))
-		}
+	if filter != nil && filter.Title != "" {
+		query.Where("title ILIKE ?", fmt.Sprintf("%%%s%%", filter.Title))
 	}
+
 	if first != 0 {
 		query.Limit(first)
 	}
@@ -76,13 +87,35 @@ func (a *ArticleRepo) CreateArticle(ctx context.Context, user *models.User, inpu
 	return article, nil
 }
 
-func (a *ArticleRepo) UpdateArticle(ctx context.Context, id string, input models.UpdateArticle) (*models.Article, error) {
-	return nil, nil
+func (a *ArticleRepo) UpdateArticle(ctx context.Context, id string, input models.UpdateArticle) (*models.Article, error) { //TODO: It can't replace empty fields
+	article, err := a.GetArticleByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if input.Title != "" {
+		article.Title = input.Title
+	}
+	if input.Content != "" {
+		article.Content = input.Content
+	}
+	if input.ThumbnailURL != "" {
+		article.ThumbnailURL = input.ThumbnailURL
+	}
+
+	res, err := a.DB.Model(article).Where("id = ?", id).Update()
+	if err != nil {
+		return nil, errs.Internal(ctx)
+	}
+	if res.RowsAffected() <= 0 {
+		return nil, errs.NotFound(ctx)
+	}
+	return article, nil
 }
 
 func (a *ArticleRepo) DeleteArticle(ctx context.Context, id string) (bool, error) {
-	article := models.Article{ID: id}
-	res, err := a.DB.Model(&article).Where("id = ?", article.ID).Delete()
+	article := &models.Article{ID: id}
+	res, err := a.DB.Model(article).Where("id = ?", id).Delete()
 	if err != nil {
 		return false, errs.Internal(ctx)
 	}
