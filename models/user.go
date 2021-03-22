@@ -23,6 +23,6 @@ type UpdateUser struct {
 }
 
 type UserFilter struct {
-	Name  string `json:"name" validate:"omitempty,min=2,max=64"`
-	Email string `json:"email" validate:"omitempty,email"`
+	Name  string `json:"name" validate:"omitempty,max=64"`
+	Email string `json:"email" validate:"omitempty,max=320"`
 }

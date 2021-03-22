@@ -20,10 +20,10 @@ func (u *UserRepo) GetUsers(ctx context.Context, filter *models.UserFilter, firs
 	query := u.DB.Model(&users).Order("id")
 	if filter != nil {
 		if filter.Name != "" {
-			query.Where("title ILIKE ?", fmt.Sprintf("%%%s%%", filter.Name))
+			query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", filter.Name))
 		}
 		if filter.Email != "" {
-			query.Where("title ILIKE ?", fmt.Sprintf("%%%s%%", filter.Email))
+			query.Where("email ILIKE ?", fmt.Sprintf("%%%s%%", filter.Email))
 		}
 	}
 	if first != 0 {
@@ -69,7 +69,7 @@ func (u *UserRepo) GetUserByEmail(ctx context.Context, email string) (*models.Us
 	return user, err
 }
 
-func (u *UserRepo) GetUsersByIDs(ids []string) ([]*models.User, []error) { //TODO: Add not found error
+func (u *UserRepo) GetUsersByIDs(ids []string) ([]*models.User, []error) {
 	var users []*models.User
 
 	err := u.DB.Model(&users).Where("id in (?)", pg.In(ids)).Select()
@@ -153,6 +153,7 @@ func (u *UserRepo) UpdateUser(ctx context.Context, id string, input models.Updat
 	if err != nil {
 		return nil, errs.Internal(ctx)
 	}
+
 	if res.RowsAffected() <= 0 {
 		return nil, errs.NotFound(ctx)
 	}

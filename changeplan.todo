@@ -5,4 +5,5 @@ TODO: remove service.Repos and make different interfaces
 TODO: Pass context to services.
 TODO: Check if error presenter is necessary
 TODO: Check typenames in tests
-TODO: Put easier easier to debug data to tests
+TODO: Put easier to debug data to tests
+TODO: lowercase the email

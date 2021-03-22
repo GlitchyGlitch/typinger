@@ -40,7 +40,15 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 }
 
 func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	if !auth.Authorize(auth.FromContext(ctx)) {
+		return false, errs.Forbidden(ctx)
+	}
+
+	if ok := r.Validator.CheckUUID(ctx, id); !ok {
+		return false, nil
+	}
+	
+	return r.Repos.DeleteUser(ctx, id)
 }
 
 func (r *mutationResolver) CreateArticle(ctx context.Context, input models.NewArticle) (*models.Article, error) {

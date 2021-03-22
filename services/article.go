@@ -63,7 +63,7 @@ func (a *ArticleRepo) GetArticlesByUserIDs(ids []string) ([][]*models.Article, [
 		return nil, []error{} // TODO: internal error here
 	}
 	if len(articles) == 0 {
-		return result, []error{}
+		return nil, []error{}
 	}
 	for _, article := range articles {
 		aMap[article.Author] = append(aMap[article.Author], article)
