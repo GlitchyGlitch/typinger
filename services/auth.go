@@ -2,8 +2,8 @@ package services
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/GlitchyGlitch/typinger/auth"
 	"github.com/GlitchyGlitch/typinger/crypto"
 	"github.com/GlitchyGlitch/typinger/errs"
 	"github.com/GlitchyGlitch/typinger/models"
@@ -12,7 +12,8 @@ import (
 )
 
 type AuthRepo struct {
-	DB *pg.DB
+	DB              *pg.DB
+	TokenController tokenController
 }
 
 func (a *AuthRepo) Authenticate(ctx context.Context, login models.LoginInput) (string, error) {
@@ -30,9 +31,10 @@ func (a *AuthRepo) Authenticate(ctx context.Context, login models.LoginInput) (s
 		errs.Add(ctx, errs.BadCredencials(ctx))
 		return "", nil
 	}
-	jwtStr, err := auth.Token(user.ID)
+	tokenStr, err := a.TokenController.Token(user.ID) // TODO: add
 	if err != nil {
+		fmt.Println(err.Error())
 		return "", errs.Internal(ctx)
 	}
-	return jwtStr, err
+	return tokenStr, err
 }

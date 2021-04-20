@@ -6,10 +6,13 @@ import (
 )
 
 type Config struct {
+	Protocol     string
+	Domain       string
+	ImgDir       string
 	DBURL        string
 	Host         string
 	Port         string
-	JwtSecret    string
+	JWTSecret    []byte
 	IdleTimeout  time.Duration
 	WriteTimeout time.Duration
 	ReadTimeout  time.Duration
@@ -30,5 +33,9 @@ func New() *Config {
 	c.IdleTimeout = EnvIdleTimeout()
 	c.WriteTimeout = EnvWriteTimeout()
 	c.ReadTimeout = EnvReadTimeout()
+	c.JWTSecret = EnvJWTSecret()
+	c.Domain = EnvDomain(c.Host)
+	c.ImgDir = EnvImgDir()
+	c.Protocol = EnvProtocol()
 	return c
 }

@@ -6,18 +6,16 @@ import (
 
 const alphanum = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-func randomStr(length int) (string, error) {
+func randomBytes(length int) ([]byte, error) {
 	bytes := make([]byte, length)
 
 	if _, err := rand.Read(bytes); err != nil {
-		return "", err
+		return []byte{}, err
 	}
 
 	for i, b := range bytes {
 		bytes[i] = alphanum[b%byte(len(alphanum))]
 	}
 
-	return string(bytes), nil
+	return bytes, nil
 }
-
-// TODO: generate JWT

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -11,7 +12,9 @@ import (
 	"github.com/GlitchyGlitch/typinger/auth"
 	"github.com/GlitchyGlitch/typinger/config"
 	"github.com/GlitchyGlitch/typinger/dataloaders"
+	"github.com/GlitchyGlitch/typinger/fileapi"
 	"github.com/GlitchyGlitch/typinger/graphql"
+	"github.com/GlitchyGlitch/typinger/jwtcontroller"
 	"github.com/GlitchyGlitch/typinger/postgres"
 	"github.com/GlitchyGlitch/typinger/services"
 	"github.com/GlitchyGlitch/typinger/validator"
@@ -22,17 +25,18 @@ import (
 	"github.com/go-pg/pg"
 )
 
-func router(handler http.Handler, repos *services.Repos, config *config.Config) *chi.Mux {
+func router(gqlHandler http.Handler, repos *services.Repos, fAPI *fileapi.FileAPI, config *config.Config, tc *jwtcontroller.JWTController) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{config.Addr()},
 		AllowCredentials: true,
 	}))
-	router.Use(auth.Middleware(repos))
+	router.Use(auth.Middleware(tc, repos))
 	router.Use(dataloaders.Middleware(repos))
 
 	router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
-	router.Handle("/graphql", handler)
+	router.Handle("/graphql", gqlHandler)
+	router.Get(fmt.Sprintf("/%s/{slug}", config.ImgDir), fAPI.GetImage)
 	return router
 }
 
@@ -47,20 +51,22 @@ func httpServer(conf *config.Config, router *chi.Mux) *http.Server {
 	return srv
 }
 
-func startServer(conf *config.Config) {
+func startServer(conf *config.Config, testTime int) {
 	opt, err := pg.ParseURL(conf.DBURL)
 	if err != nil {
 		log.Fatal(err)
 	}
-	DB := postgres.New(opt)
-	defer DB.Close()
-	// DB.AddQueryHook(&postgres.DBLogger{})
+	db := postgres.New(opt)
+	defer db.Close()
+	// db.AddQueryHook(&postgres.dbLogger{})
 
-	repos := services.NewRepos(DB)
+	tc := jwtcontroller.New(conf)
+	repos := services.NewRepos(db, tc)
+	fAPI := fileapi.New(repos)
 	errPresenter := graphql.ErrorPresenter() // TODO: Make it works
 	v := validator.New()
-	handler := graphql.Handler(repos, v, errPresenter)
-	router := router(handler, repos, conf)
+	handler := graphql.Handler(repos, conf, v, errPresenter)
+	router := router(handler, repos, fAPI, conf, tc)
 	srv := httpServer(conf, router)
 
 	go func() {
@@ -73,6 +79,11 @@ func startServer(conf *config.Config) {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, os.Kill)
 
+	if testTime != 0 {
+		time.Sleep(time.Duration(testTime) * time.Second)
+		close(sigChan)
+	}
+
 	<-sigChan
 	log.Println("Shutting down...")
 
@@ -81,10 +92,9 @@ func startServer(conf *config.Config) {
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
-	return
 }
 
 func main() {
 	c := config.New()
-	startServer(c)
+	startServer(c, 0)
 }

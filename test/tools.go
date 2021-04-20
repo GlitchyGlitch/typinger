@@ -9,8 +9,6 @@ import (
 	_ "github.com/lib/pq" // Driver for sql
 )
 
-const tdPath = "postgres/test_data"
-
 func MigrateTestData(mode string, dbPath string, filesPath string) { //TODO: Add abs paths to this func
 	if mode != "up" && mode != "down" {
 		panic("")

@@ -5,7 +5,6 @@ package graphql
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/GlitchyGlitch/typinger/auth"
 	"github.com/GlitchyGlitch/typinger/errs"
@@ -13,25 +12,40 @@ import (
 )
 
 func (r *queryResolver) Users(ctx context.Context, filter *models.UserFilter, first *int, offset *int) ([]*models.User, error) {
-	user := auth.FromContext(ctx)
-	if !auth.Authorize(user) {
+	if !auth.Authorize(auth.FromContext(ctx)) {
 		return nil, errs.Forbidden(ctx)
 	}
-	if ok := r.Validator.ValidateErrs(ctx, filter, true); !ok {
+	if ok := r.Validator.CheckStruct(ctx, filter, true); !ok {
 		return nil, nil
 	}
-	return r.Repos.GetUsers(ctx, filter, *first, *offset)
+	if ok := r.Validator.CheckPagination(ctx, first, offset); !ok {
+		return nil, nil
+	}
+	return r.Repos.GetUsers(ctx, filter, first, offset)
 }
 
 func (r *queryResolver) Articles(ctx context.Context, filter *models.ArticleFilter, first *int, offset *int) ([]*models.Article, error) {
-	if ok := r.Validator.ValidateErrs(ctx, filter, true); !ok {
+	if ok := r.Validator.CheckStruct(ctx, filter, true); !ok {
 		return nil, nil
 	}
-	return r.Repos.GetArticles(ctx, filter, *first, *offset)
+	if ok := r.Validator.CheckPagination(ctx, first, offset); !ok {
+		return nil, nil
+	}
+	return r.Repos.GetArticles(ctx, filter, first, offset)
 }
 
-func (r *queryResolver) Images(ctx context.Context, id *string) ([]*models.Image, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *queryResolver) Images(ctx context.Context, filter *models.ImageFilter, first *int, offset *int) ([]*models.Image, error) {
+	if !auth.Authorize(auth.FromContext(ctx)) {
+		return nil, errs.Forbidden(ctx)
+	}
+	if ok := r.Validator.CheckStruct(ctx, filter, true); !ok {
+		return nil, nil
+	}
+	if ok := r.Validator.CheckPagination(ctx, first, offset); !ok {
+		return nil, nil
+	}
+
+	return r.Repos.GetImages(ctx, filter, first, offset)
 }
 
 // Query returns QueryResolver implementation.

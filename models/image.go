@@ -3,10 +3,11 @@ package models
 import "github.com/99designs/gqlgen/graphql"
 
 type Image struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Content string `json:"content"`
-	Slug    string `json:"slug"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Img  []byte `json:"img"` // TODO: change field name to data
+	MIME string `json:"mime"`
+	Slug string `json:"slug"`
 }
 
 type NewImage struct {

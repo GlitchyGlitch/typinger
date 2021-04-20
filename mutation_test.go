@@ -49,7 +49,7 @@ func TestMutationUsers(t *testing.T) {
 				ID       graphql.String
 				Name     graphql.String
 				Email    graphql.String
-			} `graphql:"updateUser(id:\"b0592654-ac3d-4798-baea-3fb9b86a81c8\" input: {name:\"Bjarne Stroustrup\", email:\"stroustrup@gmail.com\", password:\"stroustrup\"})"`
+			} `graphql:"updateUser(id:\"b0592654-ac3d-4798-baea-3fb9b86a81c8\" input: {name:\"Fourth User\", email:\"fourth@example.com\", password:\"fourthxx\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
 		require.EqualError(t, err, "Operation forbidden.")
@@ -85,15 +85,15 @@ func TestMutationUsersAuthenticated(t *testing.T) {
 				ID       graphql.String
 				Name     graphql.String
 				Email    graphql.String
-			} `graphql:"createUser(input: {name:\"Bjarne Stroustrup\", email:\"stroustrup@gmail.com\", password:\"stroustrup\"})"`
+			} `graphql:"createUser(input: {name:\"Fourth User\", email:\"fourth@example.com\", password:\"fourthxx\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
 		require.NoError(t, err)
 
 		require.Equal(t, "User", string(mutation.User.Typename))
 		require.True(t, test.IsValidUUID(string(mutation.User.ID)))
-		require.Equal(t, "Bjarne Stroustrup", string(mutation.User.Name))
-		require.Equal(t, "stroustrup@gmail.com", string(mutation.User.Email))
+		require.Equal(t, "Fourth User", string(mutation.User.Name))
+		require.Equal(t, "fourth@example.com", string(mutation.User.Email))
 	})
 
 	t.Run("Create two same users", func(t *testing.T) {
@@ -103,7 +103,7 @@ func TestMutationUsersAuthenticated(t *testing.T) {
 				ID       graphql.String
 				Name     graphql.String
 				Email    graphql.String
-			} `graphql:"createUser(input: {name:\"Bjarne Stroustrup\", email:\"stroustrup@gmail.com\", password:\"stroustrup\"})"`
+			} `graphql:"createUser(input: {name:\"Fourth User\", email:\"fourth@example.com\", password:\"fourthxx\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
 		require.EqualError(t, err, "Resource already exists.")
@@ -119,7 +119,7 @@ func TestMutationUsersAuthenticated(t *testing.T) {
 			} `graphql:"createUser(input: {name:\"nlvsfPdxtXAwLUNEhJiyRcs1xWRjES7TIaSpKHyJbGfxGWFJDdHCq0iDykUe2Gaa33lakk7ViFfaSa2BqJovX2lEuMprg0ZHH9pSgfV0A06xvwIDEhHd8KtZ03DOkTq0WdPwJORMtDQ0JZGSZcsHc6kHC6syFdYaTiCGjZKLioQIyi4Wb4Mk20zG0fsCNv7wS4BkA5MrtiYDhYmGhasH8mAHIn8AT2BoohINHR1WGm4AbyE5o5XwKfRzLoC7a1JJG\", email:\"stroustrup@gmail.com\", password:\"st\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Name field is invalid.")
+		require.EqualError(t, err, "Field \"name\" is invalid.")
 	})
 
 	t.Run("Create user with invalid email", func(t *testing.T) {
@@ -129,10 +129,10 @@ func TestMutationUsersAuthenticated(t *testing.T) {
 				ID       graphql.String
 				Name     graphql.String
 				Email    graphql.String
-			} `graphql:"createUser(input: {name:\"Bjarne Stroustrup\", email:\"stroustrup@\", password:\"stroustrup\"})"`
+			} `graphql:"createUser(input: {name:\"Fourth User\", email:\"fourth@\", password:\"fourth\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Email field is invalid.")
+		require.EqualError(t, err, "Field \"email\" is invalid.")
 	})
 
 	t.Run("Create user with too short password", func(t *testing.T) {
@@ -142,10 +142,10 @@ func TestMutationUsersAuthenticated(t *testing.T) {
 				ID       graphql.String
 				Name     graphql.String
 				Email    graphql.String
-			} `graphql:"createUser(input: {name:\"Bjarne Stroustrup\", email:\"stroustrup@gmail.com\", password:\"st\"})"`
+			} `graphql:"createUser(input: {name:\"Fourth User\", email:\"fourth@example.com\", password:\"fo\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Password field is invalid.")
+		require.EqualError(t, err, "Field \"password\" is invalid.")
 	})
 
 	t.Run("Update existing user", func(t *testing.T) {
@@ -155,13 +155,15 @@ func TestMutationUsersAuthenticated(t *testing.T) {
 				ID       graphql.String
 				Name     graphql.String
 				Email    graphql.String
-			} `graphql:"updateUser(id:\"0e38a4bd-87a0-447f-93fd-b904c9f7f303\" input: {name:\"Linus Torvalds\", email:\"torvalds@gmail.com\", password:\"torvalds\"})"`
+			} `graphql:"updateUser(id:\"0e38a4bd-87a0-447f-93fd-b904c9f7f303\" input: {name:\"Third User Updated\", email:\"thirdupdated@example.com\", password:\"thirdupdated\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.NoError(t, err, "Operation forbidden.")
+		require.NoError(t, err)
 
 		require.Equal(t, "User", string(mutation.User.Typename))
-		require.Equal(t, "Linus Torvalds", string(mutation.User.Name))
+		require.True(t, test.IsValidUUID(string(mutation.User.ID)))
+		require.Equal(t, "Third User Updated", string(mutation.User.Name))
+		require.Equal(t, "thirdupdated@example.com", string(mutation.User.Email))
 	})
 
 	t.Run("Update nonexistent user", func(t *testing.T) {
@@ -171,22 +173,22 @@ func TestMutationUsersAuthenticated(t *testing.T) {
 				ID       graphql.String
 				Name     graphql.String
 				Email    graphql.String
-			} `graphql:"updateUser(id:\"b0592654-ac3d-4798-baea-3fb9b86a81c8\" input: {name:\"Bjarne Stroustrup\", email:\"stroustrup@gmail.com\", password:\"stroustrup\"})"`
+			} `graphql:"updateUser(id:\"b0592654-ac3d-4798-baea-3fb9b86a81c8\" input: {name:\"Third User Updated\", email:\"thirdupdated@example.com\", password:\"thirdupdated\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
 		require.EqualError(t, err, "No data found.")
 	})
-	t.Run("Update user witch invalid id", func(t *testing.T) {
+	t.Run("Update user with invalid id", func(t *testing.T) {
 		var mutation struct {
 			User struct {
 				Typename graphql.String `graphql:"__typename"`
 				ID       graphql.String
 				Name     graphql.String
 				Email    graphql.String
-			} `graphql:"updateUser(id:\"b0592654-ac3d-4798-baea-3fb9b81c8\" input: {name:\"Bjarne Stroustrup\", email:\"stroustrup@gmail.com\", password:\"stroustrup\"})"`
+			} `graphql:"updateUser(id:\"b0592654-ac3d-4798-baea-3fb9b81c8\" input: {name:\"Third User Updated\", email:\"thirdupdated@example.com\", password:\"thirdupdated\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "ID field is invalid.")
+		require.EqualError(t, err, "Field \"id\" is invalid.")
 	})
 
 	t.Run("Delete existing user", func(t *testing.T) {
@@ -212,11 +214,11 @@ func TestMutationUsersAuthenticated(t *testing.T) {
 			Deleted graphql.Boolean `graphql:"deleteUser(id:\"b059654\")"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "ID field is invalid.")
+		require.EqualError(t, err, "Field \"id\" is invalid.")
 	})
 }
 
-func TestMutationArticles(t *testing.T) {
+func TestMutationArticles(t *testing.T) { // TODO: update test data for articles
 	conf := config.New()
 	conf.Port = "8001"
 	c := setup(false, conf)
@@ -230,7 +232,7 @@ func TestMutationArticles(t *testing.T) {
 				Title        graphql.String
 				Content      graphql.String
 				ThumbnailURL graphql.String
-			} `graphql:"createArticle(input: {title:\"Artcile created as test\", content:\"Nothing important here.\", thumbnailUrl:\"http://www.example.com/path/to/photo3.jpg\"})"`
+			} `graphql:"createArticle(input: {title:\"Fourth article\", content:\"Fourth content.\", thumbnailUrl:\"http://www.example.com/path/to/photo4.jpg\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
 
@@ -245,7 +247,7 @@ func TestMutationArticles(t *testing.T) {
 				Title        graphql.String
 				Content      graphql.String
 				ThumbnailURL graphql.String
-			} `graphql:"createArticle(input: {title:\"Artcile created as test\", content:\"Nothing important here.\", thumbnailUrl:\"http://www.example.com/path/to/photo3.jpg\"})"`
+			} `graphql:"createArticle(input: {title:\"Fourth article\", content:\"Fourth content.\", thumbnailUrl:\"http://www.example.com/path/to/photo4.jpg\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
 
@@ -277,16 +279,16 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 				Title        graphql.String
 				Content      graphql.String
 				ThumbnailURL graphql.String
-			} `graphql:"createArticle(input: {title:\"Artcile created as test\", content:\"Nothing important here.\", thumbnailUrl:\"http://www.example.com/path/to/photo3.jpg\"})"`
+			} `graphql:"createArticle(input: {title:\"Fourth article\", content:\"Fourth content.\", thumbnailUrl:\"http://www.example.com/path/to/photo4.jpg\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
 
 		require.NoError(t, err)
 		require.Equal(t, "Article", string(mutation.Article.Typename))
 		require.True(t, test.IsValidUUID(string(mutation.Article.ID)))
-		require.Equal(t, "Artcile created as test", string(mutation.Article.Title))
-		require.Equal(t, "Nothing important here.", string(mutation.Article.Content))
-		require.Equal(t, "http://www.example.com/path/to/photo3.jpg", string(mutation.Article.ThumbnailURL))
+		require.Equal(t, "Fourth article", string(mutation.Article.Title))
+		require.Equal(t, "Fourth content.", string(mutation.Article.Content))
+		require.Equal(t, "http://www.example.com/path/to/photo4.jpg", string(mutation.Article.ThumbnailURL))
 	})
 
 	t.Run("Create two same articles", func(t *testing.T) {
@@ -297,7 +299,7 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 				Title        graphql.String
 				Content      graphql.String
 				ThumbnailURL graphql.String
-			} `graphql:"createArticle(input: {title:\"Article same as the other\", content:\"Nothing important here.\", thumbnailUrl:\"http://www.example.com/path/to/photo3.jpg\"})"`
+			} `graphql:"createArticle(input: {title:\"Fifth article\", content:\"Fifth content.\", thumbnailUrl:\"http://www.example.com/path/to/photo5.jpg\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
 		require.NoError(t, err)
@@ -314,10 +316,10 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 				Title        graphql.String
 				Content      graphql.String
 				ThumbnailURL graphql.String
-			} `graphql:"createArticle(input: {title:\"\", content:\"Lorem ipsum dolor sit amet.\", thumbnailUrl:\"http://www.example.com/path/to/photo3.jpg\"})"`
+			} `graphql:"createArticle(input: {title:\"\", content:\"Fourth article.\", thumbnailUrl:\"http://www.example.com/path/to/photo4.jpg\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Title field is invalid.")
+		require.EqualError(t, err, "Field \"title\" is invalid.")
 	})
 
 	t.Run("Create article with no content", func(t *testing.T) {
@@ -328,10 +330,10 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 				Title        graphql.String
 				Content      graphql.String
 				ThumbnailURL graphql.String
-			} `graphql:"createArticle(input: {title:\"Example article\", content:\"\", thumbnailUrl:\"http://www.example.com/path/to/photo3.jpg\"})"`
+			} `graphql:"createArticle(input: {title:\"Fourth article\", content:\"\", thumbnailUrl:\"http://www.example.com/path/to/photo4.jpg\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Content field is invalid.")
+		require.EqualError(t, err, "Field \"content\" is invalid.")
 	})
 
 	t.Run("Create article with invalid thumbnailUrl", func(t *testing.T) {
@@ -342,10 +344,10 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 				Title        graphql.String
 				Content      graphql.String
 				ThumbnailURL graphql.String
-			} `graphql:"createArticle(input: {title:\"Example article\", content:\"Lorem ipsum dolor sit amet.\", thumbnailUrl:\"Just a text\"})"`
+			} `graphql:"createArticle(input: {title:\"Fourth article\", content:\"Fourth content.\", thumbnailUrl:\"invalidurl\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Thumbnail URL field is invalid.")
+		require.EqualError(t, err, "Field \"thumbnailUrl\" is invalid.")
 	})
 
 	t.Run("Create article with no thumbnailUrl", func(t *testing.T) {
@@ -356,10 +358,10 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 				Title        graphql.String
 				Content      graphql.String
 				ThumbnailURL graphql.String
-			} `graphql:"createArticle(input: {title:\"Example article\", content:\"Lorem ipsum dolor sit amet.\", thumbnailUrl:\"Just a text\"})"`
+			} `graphql:"createArticle(input: {title:\"Fourth article\", content:\"Fourth content.\", thumbnailUrl:\"invalidurl\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Thumbnail URL field is invalid.")
+		require.EqualError(t, err, "Field \"thumbnailUrl\" is invalid.")
 	})
 
 	t.Run("Delete article", func(t *testing.T) {
@@ -382,10 +384,10 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 
 	t.Run("Delete article invalid id", func(t *testing.T) {
 		var mutation struct {
-			Deleted graphql.Boolean `graphql:"deleteArticle(id:\"NotAUUID\")"`
+			Deleted graphql.Boolean `graphql:"deleteArticle(id:\"invaliduuid\")"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "ID field is invalid.")
+		require.EqualError(t, err, "Field \"id\" is invalid.")
 		require.False(t, bool(mutation.Deleted))
 	})
 }

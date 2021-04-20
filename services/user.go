@@ -14,10 +14,10 @@ type UserRepo struct {
 	DB *pg.DB
 }
 
-func (u *UserRepo) GetUsers(ctx context.Context, filter *models.UserFilter, first, offset int) ([]*models.User, error) {
+func (u *UserRepo) GetUsers(ctx context.Context, filter *models.UserFilter, first, offset *int) ([]*models.User, error) {
 	var users []*models.User
 
-	query := u.DB.Model(&users).Order("id")
+	query := u.DB.Model(&users).Order("created_at DESC")
 	if filter != nil {
 		if filter.Name != "" {
 			query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", filter.Name))
@@ -26,12 +26,13 @@ func (u *UserRepo) GetUsers(ctx context.Context, filter *models.UserFilter, firs
 			query.Where("email ILIKE ?", fmt.Sprintf("%%%s%%", filter.Email))
 		}
 	}
-	if first != 0 {
-		query.Limit(first)
+	if first != nil {
+		query.Limit(*first)
 	}
-	if offset != 0 {
-		query.Offset(offset)
+	if offset != nil {
+		query.Offset(*offset)
 	}
+
 	err := query.Select()
 	if err != nil {
 		return nil, errs.Internal(ctx)
@@ -72,7 +73,7 @@ func (u *UserRepo) GetUserByEmail(ctx context.Context, email string) (*models.Us
 func (u *UserRepo) GetUsersByIDs(ids []string) ([]*models.User, []error) {
 	var users []*models.User
 
-	err := u.DB.Model(&users).Where("id in (?)", pg.In(ids)).Select()
+	err := u.DB.Model(&users).Where("id in (?)", pg.In(ids)).Order("crated_at DESC").Select() // Check if order works
 	if err != nil {
 		return nil, []error{err}
 	}

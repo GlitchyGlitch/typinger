@@ -22,7 +22,7 @@ func New() *Validator {
 	return v
 }
 
-func (v Validator) ValidateErrs(ctx context.Context, s interface{}, canBeNil bool) bool {
+func (v Validator) CheckStruct(ctx context.Context, s interface{}, canBeNil bool) bool {
 	if s == nil || (reflect.ValueOf(s).Kind() == reflect.Ptr && reflect.ValueOf(s).IsNil()) {
 		return canBeNil
 	}
@@ -46,6 +46,18 @@ func (v Validator) CheckUUID(ctx context.Context, u string) bool {
 	_, err := uuid.Parse(u)
 	if err != nil {
 		errs.Add(ctx, errs.Validation(ctx, "id"))
+		return false
+	}
+	return true
+}
+
+func (v Validator) CheckPagination(ctx context.Context, first, offset *int) bool {
+	if *first < 0 {
+		errs.Add(ctx, errs.Validation(ctx, "first"))
+		return false
+	}
+	if *offset < 0 {
+		errs.Add(ctx, errs.Validation(ctx, "offset"))
 		return false
 	}
 	return true

@@ -7,17 +7,22 @@ import (
 )
 
 type repos interface {
-	GetArticles(context.Context, *models.ArticleFilter, int, int) ([]*models.Article, error)
-	CreateArticle(context.Context, *models.User, *models.NewArticle) (*models.Article, error)
+	GetArticles(context.Context, *models.ArticleFilter, *int, *int) ([]*models.Article, error)
+	CreateArticle(context.Context, *models.User, models.NewArticle) (*models.Article, error)
 	UpdateArticle(context.Context, string, models.UpdateArticle) (*models.Article, error)
 	DeleteArticle(context.Context, string) (bool, error)
 	GetArticlesByUserIDs([]string) ([][]*models.Article, []error)
 
-	GetUsers(context.Context, *models.UserFilter, int, int) ([]*models.User, error)
+	GetUsers(context.Context, *models.UserFilter, *int, *int) ([]*models.User, error)
 	GetUsersByIDs([]string) ([]*models.User, []error)
 	CreateUser(context.Context, models.NewUser) (*models.User, error)
 	UpdateUser(context.Context, string, models.UpdateUser) (*models.User, error)
 	DeleteUser(context.Context, string) (bool, error)
+
+	GetImages(context.Context, *models.ImageFilter, *int, *int) ([]*models.Image, error)
+	CreateImage(context.Context, models.NewImage) (*models.Image, error)
+	UpdateImage(context.Context, string, models.UpdateImage) (*models.Image, error)
+	DeleteImage(context.Context, string) (bool, error)
 
 	Authenticate(context.Context, models.LoginInput) (string, error)
 }

@@ -4,6 +4,8 @@ type Image {
   id: ID
   name: String
   slug: String
+  url: String
+  mime: String
 }
 
 input NewImage {
@@ -16,4 +18,9 @@ input UpdateImage {
   name: String
   slug: String
   file: Upload
+}
+
+input ImageFilter {
+  name: String
+  slug: String
 }

@@ -5,7 +5,6 @@ package graphql
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/GlitchyGlitch/typinger/auth"
 	"github.com/GlitchyGlitch/typinger/errs"
@@ -17,7 +16,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input models.NewUser)
 		return nil, errs.Forbidden(ctx)
 	}
 
-	if ok := r.Validator.ValidateErrs(ctx, input, false); !ok {
+	if ok := r.Validator.CheckStruct(ctx, input, false); !ok {
 		return nil, nil
 	}
 
@@ -33,7 +32,7 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id string, input mode
 	if ok := r.Validator.CheckUUID(ctx, id); !ok {
 		return nil, nil
 	}
-	if ok := r.Validator.ValidateErrs(ctx, input, false); !ok {
+	if ok := r.Validator.CheckStruct(ctx, input, false); !ok {
 		return nil, nil
 	}
 	return r.Repos.UpdateUser(ctx, id, input)
@@ -47,7 +46,7 @@ func (r *mutationResolver) DeleteUser(ctx context.Context, id string) (bool, err
 	if ok := r.Validator.CheckUUID(ctx, id); !ok {
 		return false, nil
 	}
-	
+
 	return r.Repos.DeleteUser(ctx, id)
 }
 
@@ -57,11 +56,11 @@ func (r *mutationResolver) CreateArticle(ctx context.Context, input models.NewAr
 		return nil, errs.Forbidden(ctx)
 	}
 
-	if ok := r.Validator.ValidateErrs(ctx, input, false); !ok {
+	if ok := r.Validator.CheckStruct(ctx, input, false); !ok {
 		return nil, nil
 	}
 
-	return r.Repos.CreateArticle(ctx, user, &input)
+	return r.Repos.CreateArticle(ctx, user, input)
 }
 
 func (r *mutationResolver) UpdateArticle(ctx context.Context, id string, input models.UpdateArticle) (*models.Article, error) {
@@ -73,7 +72,7 @@ func (r *mutationResolver) UpdateArticle(ctx context.Context, id string, input m
 	if ok := r.Validator.CheckUUID(ctx, id); !ok {
 		return nil, nil
 	}
-	if ok := r.Validator.ValidateErrs(ctx, input, false); !ok {
+	if ok := r.Validator.CheckStruct(ctx, input, false); !ok {
 		return nil, nil
 	}
 
@@ -93,16 +92,43 @@ func (r *mutationResolver) DeleteArticle(ctx context.Context, id string) (bool, 
 	return r.Repos.DeleteArticle(ctx, id)
 }
 
-func (r *mutationResolver) CreateImages(ctx context.Context, input []*models.NewImage) ([]*models.Image, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) CreateImage(ctx context.Context, input models.NewImage) (*models.Image, error) {
+	if !auth.Authorize(auth.FromContext(ctx)) {
+		return nil, errs.Forbidden(ctx)
+	}
+
+	if ok := r.Validator.CheckStruct(ctx, input, false); !ok {
+		return nil, nil
+	}
+
+	return r.Repos.CreateImage(ctx, input)
 }
 
 func (r *mutationResolver) UpdateImage(ctx context.Context, id string, input models.UpdateImage) (*models.Image, error) {
-	panic(fmt.Errorf("not implemented"))
+	if !auth.Authorize(auth.FromContext(ctx)) {
+		return nil, errs.Forbidden(ctx)
+	}
+
+	if ok := r.Validator.CheckUUID(ctx, id); !ok {
+		return nil, nil
+	}
+	if ok := r.Validator.CheckStruct(ctx, input, false); !ok {
+		return nil, nil
+	}
+
+	return r.Repos.UpdateImage(ctx, id, input)
 }
 
-func (r *mutationResolver) DeleteImages(ctx context.Context, ids []string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) DeleteImage(ctx context.Context, id string) (bool, error) {
+	if !auth.Authorize(auth.FromContext(ctx)) {
+		return true, errs.Forbidden(ctx)
+	}
+
+	if ok := r.Validator.CheckUUID(ctx, id); !ok {
+		return false, nil
+	}
+
+	return r.Repos.DeleteImage(ctx, id)
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input models.LoginInput) (string, error) {

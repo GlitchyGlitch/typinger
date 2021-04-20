@@ -7,6 +7,7 @@ CREATE TABLE users (
   name VARCHAR(64) NOT NULL,
   email VARCHAR(320) UNIQUE,
   password_hash VARCHAR(60),
+  created_at TIMESTAMP NOT NULL DEFAULT Now(),
   deleted_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NULL,
   PRIMARY KEY (id)
 );
@@ -25,7 +26,9 @@ CREATE TABLE articles (
 CREATE TABLE images (
   id UUID DEFAULT uuid_generate_v4(),
   name VARCHAR(128),
-  url VARCHAR(256) UNIQUE NOT NULL,
+  slug VARCHAR(256) UNIQUE NOT NULL,
+  mime VARCHAR(64) NOT NULL,
   img BYTEA NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT Now(),
   PRIMARY KEY (id)
 );

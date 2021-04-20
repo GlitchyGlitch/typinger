@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/stoewer/go-strcase"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -32,7 +33,7 @@ func Forbidden(ctx context.Context) *gqlerror.Error {
 func NotFound(ctx context.Context) *gqlerror.Error {
 	return &gqlerror.Error{
 		Path:    graphql.GetPath(ctx),
-		Message: "No data found.", // TODO: check ortography
+		Message: "No data found.",
 		Extensions: map[string]interface{}{
 			"code": "NOT_FOUND",
 		},
@@ -42,7 +43,7 @@ func NotFound(ctx context.Context) *gqlerror.Error {
 func Exists(ctx context.Context) *gqlerror.Error {
 	return &gqlerror.Error{
 		Path:    graphql.GetPath(ctx),
-		Message: "Resource already exists.", // TODO: check ortography
+		Message: "Resource already exists.",
 		Extensions: map[string]interface{}{
 			"code": "EXISTS",
 		},
@@ -52,7 +53,7 @@ func Exists(ctx context.Context) *gqlerror.Error {
 func Internal(ctx context.Context) *gqlerror.Error {
 	return &gqlerror.Error{
 		Path:    graphql.GetPath(ctx),
-		Message: "Internal server error.", // TODO: check ortography
+		Message: "Internal server error.",
 		Extensions: map[string]interface{}{
 			"code": "INTERNAL_ERROR",
 		},
@@ -62,7 +63,7 @@ func Internal(ctx context.Context) *gqlerror.Error {
 func Validation(ctx context.Context, field string) *gqlerror.Error {
 	return &gqlerror.Error{
 		Path:    graphql.GetPath(ctx),
-		Message: fmt.Sprintf("%s field is invalid.", transformField(field)),
+		Message: fmt.Sprintf("Field \"%s\" is invalid.", strcase.LowerCamelCase(field)),
 		Extensions: map[string]interface{}{
 			"code": fmt.Sprintf("VALIDATION_ERROR_%s", strings.ToUpper(field)),
 		},

@@ -8,13 +8,15 @@ type Repos struct {
 	UserRepo
 	ArticleRepo
 	AuthRepo
+	ImageRepo
 }
 
-func NewRepos(DB *pg.DB) *Repos {
+func NewRepos(db *pg.DB, tc tokenController) *Repos {
 	repos := &Repos{
-		UserRepo:    UserRepo{DB: DB},
-		ArticleRepo: ArticleRepo{DB: DB},
-		AuthRepo:    AuthRepo{DB: DB},
+		UserRepo:    UserRepo{DB: db},
+		ArticleRepo: ArticleRepo{DB: db},
+		ImageRepo:   ImageRepo{DB: db},
+		AuthRepo:    AuthRepo{DB: db, TokenController: tc},
 	}
 	return repos
 }

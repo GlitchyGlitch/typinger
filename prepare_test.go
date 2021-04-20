@@ -11,12 +11,12 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const tdPath = "postgres/test_data"
+const tdPath = "postgres/fixtures"
 
 func setup(auth bool, conf *config.Config) *graphql.Client {
 	test.RenewTestData(conf.DBURL, tdPath)
 
-	go startServer(conf)
+	go startServer(conf, 2)
 	time.Sleep(100 * time.Millisecond) // Wait for server startup
 	url := fmt.Sprintf("http://%s/graphql", conf.Addr())
 	if !auth {
@@ -25,7 +25,7 @@ func setup(auth bool, conf *config.Config) *graphql.Client {
 
 	loginClient := graphql.NewClient(url, nil)
 	var loginMut struct {
-		Login graphql.String `graphql:"login(input: {email: \"ritchie@gmail.com\", password:\"ritchie\"})"`
+		Login graphql.String `graphql:"login(input: {email: \"first@example.com\", password:\"first\"})"`
 	}
 	err := loginClient.Mutate(context.Background(), &loginMut, nil)
 	if err != nil {

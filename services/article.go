@@ -25,24 +25,25 @@ func (a *ArticleRepo) GetArticleByID(ctx context.Context, id string) (*models.Ar
 	return article, nil
 }
 
-func (a *ArticleRepo) GetArticles(ctx context.Context, filter *models.ArticleFilter, first, offset int) ([]*models.Article, error) {
+func (a *ArticleRepo) GetArticles(ctx context.Context, filter *models.ArticleFilter, first, offset *int) ([]*models.Article, error) {
 	var articles []*models.Article
 
-	query := a.DB.Model(&articles).Order("id")
+	query := a.DB.Model(&articles).Order("created_at DESC") // TODO: sort by time
 
 	if filter != nil && filter.Title != "" {
 		query.Where("title ILIKE ?", fmt.Sprintf("%%%s%%", filter.Title))
 	}
 
-	if first != 0 {
-		query.Limit(first)
+	if first != nil {
+		query.Limit(*first)
 	}
-	if offset != 0 {
-		query.Offset(offset)
+	if offset != nil {
+		query.Offset(*offset)
 	}
 
-	err := query.Select()
+	err := query.Select() //TODO: Order
 	if err != nil {
+		fmt.Println(err)
 		return nil, errs.Internal(ctx)
 	}
 	if len(articles) == 0 {
@@ -60,7 +61,7 @@ func (a *ArticleRepo) GetArticlesByUserIDs(ids []string) ([][]*models.Article, [
 	err := a.DB.Model(&articles).Where("author in (?)", pg.In(ids)).Order("author").Select()
 
 	if err != nil {
-		return nil, []error{} // TODO: internal error here
+		return nil, []error{} // TODO: internal error here add ctx to do this
 	}
 	if len(articles) == 0 {
 		return nil, []error{}
@@ -75,7 +76,7 @@ func (a *ArticleRepo) GetArticlesByUserIDs(ids []string) ([][]*models.Article, [
 	return result, nil
 }
 
-func (a *ArticleRepo) CreateArticle(ctx context.Context, user *models.User, input *models.NewArticle) (*models.Article, error) {
+func (a *ArticleRepo) CreateArticle(ctx context.Context, user *models.User, input models.NewArticle) (*models.Article, error) {
 	article := &models.Article{Title: input.Title, Content: input.Content, ThumbnailURL: input.ThumbnailURL, Author: user.ID}
 	res, err := a.DB.Model(article).OnConflict("DO NOTHING").Insert()
 	if err != nil {
@@ -116,6 +117,7 @@ func (a *ArticleRepo) UpdateArticle(ctx context.Context, id string, input models
 func (a *ArticleRepo) DeleteArticle(ctx context.Context, id string) (bool, error) {
 	article := &models.Article{ID: id}
 	res, err := a.DB.Model(article).Where("id = ?", id).Delete()
+
 	if err != nil {
 		return false, errs.Internal(ctx)
 	}
@@ -123,5 +125,6 @@ func (a *ArticleRepo) DeleteArticle(ctx context.Context, id string) (bool, error
 		errs.Add(ctx, errs.NotFound(ctx))
 		return false, nil
 	}
+
 	return true, nil
 }
