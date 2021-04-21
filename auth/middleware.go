@@ -37,6 +37,7 @@ func Middleware(tc tokenController, rep repos) func(http.Handler) http.Handler {
 				next.ServeHTTP(w, r)
 				return
 			}
+
 			// Check if user exists
 			user, err := rep.GetUserByID(r.Context(), id)
 			if err != nil || user == nil {

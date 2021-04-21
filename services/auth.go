@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/GlitchyGlitch/typinger/crypto"
 	"github.com/GlitchyGlitch/typinger/errs"
@@ -33,7 +32,6 @@ func (a *AuthRepo) Authenticate(ctx context.Context, login models.LoginInput) (s
 	}
 	tokenStr, err := a.TokenController.Token(user.ID) // TODO: add
 	if err != nil {
-		fmt.Println(err.Error())
 		return "", errs.Internal(ctx)
 	}
 	return tokenStr, err

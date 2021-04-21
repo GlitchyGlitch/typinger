@@ -73,7 +73,7 @@ func (u *UserRepo) GetUserByEmail(ctx context.Context, email string) (*models.Us
 func (u *UserRepo) GetUsersByIDs(ids []string) ([]*models.User, []error) {
 	var users []*models.User
 
-	err := u.DB.Model(&users).Where("id in (?)", pg.In(ids)).Order("crated_at DESC").Select() // Check if order works
+	err := u.DB.Model(&users).Where("id in (?)", pg.In(ids)).Order("created_at DESC").Select() // Check if order works
 	if err != nil {
 		return nil, []error{err}
 	}

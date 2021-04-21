@@ -5,7 +5,7 @@ INSERT INTO users (id, name, email, password_hash, created_at)
 VALUES ('d1451907-e1ec-4291-ab14-a9a314b56b6a', 'Second User', 'second@example.com', '$2y$12$/7gXXmn.s7Ou5R1sKvWmr.4v9q1K9VbyHZOMqGAccvMgxuifGFZ7m', '02/02/2020 02:02:02'); /* password: second */
 
 INSERT INTO users (id, name, email, password_hash, created_at)
-VALUES ('0e38a4bd-87a0-447f-93fd-b904c9f7f303', 'Third User', 'third@example.com', '$2y$12$MOTaU8rec4WQrzg5p4OLVO9brmharzlkygaCaxLy.K3of4wKlRd5m', '01/01/2020 01:01:01'); /* password: third */
+VALUES ('0e38a4bd-87a0-447f-93fd-b904c9f7f303', 'Third User', 'third@example.com', '$2y$12$HtXQXTYVDPe0FOPgcfDfMu1dHCTBPMQc/jzlxg4lBpRWEoHLfOA1K ', '01/01/2020 01:01:01'); /* password: third */
 
 /*----------------------------------------------------------------*/
 
