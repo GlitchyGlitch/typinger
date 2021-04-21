@@ -12,7 +12,7 @@ type Article struct {
 }
 
 type ArticleFilter struct {
-	Title string `json:"title" validate:"omitempty,max=256"`
+	Title *string `json:"title" validate:"omitempty,max=256"`
 }
 
 type NewArticle struct {

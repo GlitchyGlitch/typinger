@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/GlitchyGlitch/typinger/auth"
@@ -77,7 +78,7 @@ func startServer(conf *config.Config, testTime int) {
 	log.Printf("🚀 Server running on %s", conf.Addr())
 
 	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, os.Interrupt, os.Kill)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM) //TODO: check how about os.KILL
 
 	if testTime != 0 {
 		time.Sleep(time.Duration(testTime) * time.Second)

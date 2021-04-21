@@ -1,8 +1,7 @@
 TODO: Max limit of posts to fech
-TODO: Use context for all repositories
+TODO: Use context for dataloaders
 TODO: Check if error presenter is necessary
 TODO: Check typenames in tests
-TODO: Put easier to debug data to tests
 TODO: lowercase the email
 TODO: User soft delete
 TODO: created_at field for User
@@ -13,3 +12,5 @@ TODO: Add support for Content Security Policy
 TODO: Add support for X Frame Options
 TODO: Add support for Strict Transport Security
 TODO: Refactor tests
+TODO: Make sure if Chache-Control is not necessary
+TODO: Config domain in cors

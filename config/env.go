@@ -80,7 +80,7 @@ func EnvDomain(host string) string {
 }
 
 func EnvImgDir() string {
-	dir := os.Getenv("DOMAIN")
+	dir := os.Getenv("IMG_DIR")
 	if dir == "" {
 		return "img"
 	}
@@ -88,7 +88,7 @@ func EnvImgDir() string {
 }
 
 func EnvProtocol() string {
-	dir := os.Getenv("DOMAIN")
+	dir := os.Getenv("PROTOCOL")
 	if dir == "" {
 		return "http"
 	}

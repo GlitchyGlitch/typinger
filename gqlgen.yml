@@ -78,3 +78,4 @@ models:
     model: github.com/GlitchyGlitch/typinger/models.Image
   LoginInput:
     model: github.com/GlitchyGlitch/typinger/models.LoginInput
+# TODO: Update models

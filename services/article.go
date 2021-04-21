@@ -28,10 +28,10 @@ func (a *ArticleRepo) GetArticleByID(ctx context.Context, id string) (*models.Ar
 func (a *ArticleRepo) GetArticles(ctx context.Context, filter *models.ArticleFilter, first, offset *int) ([]*models.Article, error) {
 	var articles []*models.Article
 
-	query := a.DB.Model(&articles).Order("created_at DESC") // TODO: sort by time
+	query := a.DB.Model(&articles).Order("created_at DESC")
 
-	if filter != nil && filter.Title != "" {
-		query.Where("title ILIKE ?", fmt.Sprintf("%%%s%%", filter.Title))
+	if filter != nil && filter.Title != nil {
+		query.Where("title ILIKE ?", fmt.Sprintf("%%%s%%", *filter.Title))
 	}
 
 	if first != nil {
@@ -41,7 +41,7 @@ func (a *ArticleRepo) GetArticles(ctx context.Context, filter *models.ArticleFil
 		query.Offset(*offset)
 	}
 
-	err := query.Select() //TODO: Order
+	err := query.Select()
 	if err != nil {
 		fmt.Println(err)
 		return nil, errs.Internal(ctx)

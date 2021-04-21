@@ -19,11 +19,11 @@ func (u *UserRepo) GetUsers(ctx context.Context, filter *models.UserFilter, firs
 
 	query := u.DB.Model(&users).Order("created_at DESC")
 	if filter != nil {
-		if filter.Name != "" {
-			query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", filter.Name))
+		if filter.Name != nil {
+			query.Where("name ILIKE ?", fmt.Sprintf("%%%s%%", *filter.Name))
 		}
-		if filter.Email != "" {
-			query.Where("email ILIKE ?", fmt.Sprintf("%%%s%%", filter.Email))
+		if filter.Email != nil {
+			query.Where("email ILIKE ?", fmt.Sprintf("%%%s%%", *filter.Email))
 		}
 	}
 	if first != nil {
