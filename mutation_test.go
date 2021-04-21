@@ -21,7 +21,7 @@ func TestMutationUsers(t *testing.T) {
 			User user `graphql:"createUser(input: {name:\"Fourth User\", email:\"fourth@example.com\", password:\"firstxx\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Operation forbidden.")
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Update existing user forbidden", func(t *testing.T) {
@@ -29,7 +29,7 @@ func TestMutationUsers(t *testing.T) {
 			User user `graphql:"updateUser(id:\"0e38a4bd-87a0-447f-93fd-b904c9f7f303\" input: {name:\"Fourth User\", email:\"fourth@example.com\", password:\"firstxx\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Operation forbidden.")
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Update user not found forbidden", func(t *testing.T) {
@@ -37,7 +37,7 @@ func TestMutationUsers(t *testing.T) {
 			User user `graphql:"updateUser(id:\"b0592654-ac3d-4798-baea-3fb9b86a81c8\" input: {name:\"Fourth User\", email:\"fourth@example.com\", password:\"fourthxx\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Operation forbidden.")
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Delete existing user forbidden", func(t *testing.T) {
@@ -45,7 +45,7 @@ func TestMutationUsers(t *testing.T) {
 			Deleted graphql.Boolean `graphql:"deleteUser(id:\"0e38a4bd-87a0-447f-93fd-b904c9f7f303\")"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Operation forbidden.")
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Delete nonexistent user forbidden", func(t *testing.T) {
@@ -53,7 +53,7 @@ func TestMutationUsers(t *testing.T) {
 			Deleted graphql.Boolean `graphql:"deleteUser(id:\"b0592654-ac3d-4798-baea-3fb9b86a81c8\")"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Operation forbidden.")
+		require.EqualError(t, err, forbiddenErr)
 	})
 }
 
@@ -81,7 +81,7 @@ func TestMutationUsersAuthenticated(t *testing.T) {
 			User user `graphql:"createUser(input: {name:\"Fourth User\", email:\"fourth@example.com\", password:\"fourthxx\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Resource already exists.")
+		require.EqualError(t, err, existsErr)
 	})
 
 	t.Run("Create user with too long name", func(t *testing.T) {
@@ -126,7 +126,7 @@ func TestMutationUsersAuthenticated(t *testing.T) {
 			User user `graphql:"updateUser(id:\"b0592654-ac3d-4798-baea-3fb9b86a81c8\" input: {name:\"Third User Updated\", email:\"thirdupdated@example.com\", password:\"thirdupdated\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "No data found.")
+		require.EqualError(t, err, notFoundErr)
 	})
 	t.Run("Update user with invalid id", func(t *testing.T) {
 		var mutation struct {
@@ -151,7 +151,7 @@ func TestMutationUsersAuthenticated(t *testing.T) {
 			Deleted graphql.Boolean `graphql:"deleteUser(id:\"b0592654-ac3d-4798-baea-3fb9b86a81c8\")"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "No data found.")
+		require.EqualError(t, err, notFoundErr)
 	})
 
 	t.Run("Delete user with invalid id", func(t *testing.T) {
@@ -169,21 +169,13 @@ func TestMutationArticles(t *testing.T) { // TODO: update test data for articles
 	c := setup(false, conf)
 	defer teardown(conf)
 
-	type article struct {
-		Typename     graphql.String `graphql:"__typename"`
-		ID           graphql.String
-		Title        graphql.String
-		Content      graphql.String
-		ThumbnailURL graphql.String
-	}
-
 	t.Run("Creating artcile forbidden", func(t *testing.T) {
 		var mutation struct {
 			Article article `graphql:"createArticle(input: {title:\"Fourth article\", content:\"Fourth content.\", thumbnailUrl:\"http://www.example.com/path/to/photo4.jpg\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
 
-		require.EqualError(t, err, "Operation forbidden.")
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Updateing article forbidden", func(t *testing.T) {
@@ -192,7 +184,7 @@ func TestMutationArticles(t *testing.T) { // TODO: update test data for articles
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
 
-		require.EqualError(t, err, "Operation forbidden.")
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Deleting artcile forbidden", func(t *testing.T) {
@@ -201,7 +193,7 @@ func TestMutationArticles(t *testing.T) { // TODO: update test data for articles
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
 
-		require.EqualError(t, err, "Operation forbidden.")
+		require.EqualError(t, err, forbiddenErr)
 		require.False(t, mutation.Deleted)
 	})
 }
@@ -212,21 +204,13 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 	c := setup(true, conf)
 	defer teardown(conf)
 
-	type article struct {
-		Typename     graphql.String `graphql:"__typename"`
-		ID           graphql.String
-		Title        graphql.String
-		Content      graphql.String
-		ThumbnailURL graphql.String
-	}
-
 	t.Run("Create article", func(t *testing.T) {
 		var mutation struct {
 			Article article `graphql:"createArticle(input: {title:\"Fourth article\", content:\"Fourth content.\", thumbnailUrl:\"http://www.example.com/path/to/photo4.jpg\"})"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-
 		require.NoError(t, err)
+
 		require.Equal(t, "Article", string(mutation.Article.Typename))
 		require.True(t, test.IsValidUUID(string(mutation.Article.ID)))
 		require.Equal(t, "Fourth article", string(mutation.Article.Title))
@@ -242,7 +226,7 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 		require.NoError(t, err)
 
 		err = c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "Resource already exists.")
+		require.EqualError(t, err, existsErr)
 	})
 
 	t.Run("Create article with no title", func(t *testing.T) {
@@ -291,7 +275,7 @@ func TestMutationArticlesAuthenticated(t *testing.T) {
 			Deleted graphql.Boolean `graphql:"deleteArticle(id:\"e5f1c9af-fa8a-4a58-9909-d887ddf7e961\")"`
 		}
 		err := c.Mutate(context.Background(), &mutation, nil)
-		require.EqualError(t, err, "No data found.")
+		require.EqualError(t, err, notFoundErr)
 		require.False(t, bool(mutation.Deleted))
 	})
 

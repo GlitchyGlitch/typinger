@@ -93,7 +93,7 @@ func TestQueryUsers(t *testing.T) {
 			Users []user
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Get users with filter forbidden", func(t *testing.T) {
@@ -101,7 +101,7 @@ func TestQueryUsers(t *testing.T) {
 			Users []user `graphql:"users(filter: {name:\"fir\", email:\"fir\"})"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Get users with pagination forbidden", func(t *testing.T) {
@@ -109,7 +109,7 @@ func TestQueryUsers(t *testing.T) {
 			Users []user `graphql:"users(first: 2, offset: 1)"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("No matches to filter forbidden", func(t *testing.T) {
@@ -117,7 +117,7 @@ func TestQueryUsers(t *testing.T) {
 			Users []user `graphql:"users(filter:{name:\"nonexistentname\", email:\"nonexistentemail\"})"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Invalid name attribute of filter forbidden", func(t *testing.T) {
@@ -125,7 +125,7 @@ func TestQueryUsers(t *testing.T) {
 			Users []user `graphql:"users(filter: {name: \"AAZN90ESauHQynfvljT0L9JTamLV1yKThRJhJI4AusfeofWzylykVp1QwTlhVWTkOiYlssW3DEV3HUJFR7zZmkBV5GY2tZTXB4gUPITPsZv7fVbqzPu4D59ac4yTYZu2o\"})"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Invalid email attribute of filter forbidden", func(t *testing.T) {
@@ -133,7 +133,7 @@ func TestQueryUsers(t *testing.T) {
 			Users []user `graphql:"users(filter: {email: \"cL3InRIpfwxbT9POCLM7p11aYIyyzIM3iX16aozwtY0wYXIaMZ6yGlE4O7eQY9l8B2UQK7Qt7bU2gExh9WqLquqkbLWY3a8sBKTD5MY3BfcPs46c6UmzcYxmryyqUjq3rYy4mBsH2v0Sqx4G4sCdC9ioNJJvqsfuTsYVBl1JoS8xhGfVgBCmeRG8xlH1agzQgV0GFNrL3dF9fjhoWwHPPttlh6FWChdZ4dm2xdv3o8W64umcSePUSCgHCf8se0TbTgvFt32zDzQp6gAMWmCPbjCNlEZI3jHpREeTf0e2n8xD9MstK7j5pWFZUokDSp3jx\"})"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Invalid pagination first field forbidden", func(t *testing.T) {
@@ -141,7 +141,7 @@ func TestQueryUsers(t *testing.T) {
 			Users []user `graphql:"users(first:-1, offset:1)"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Invalid pagination offset field forbidden", func(t *testing.T) {
@@ -149,7 +149,7 @@ func TestQueryUsers(t *testing.T) {
 			Users []user `graphql:"users(first:1, offset:-1)"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 }
 
@@ -246,7 +246,7 @@ func TestQueryImage(t *testing.T) {
 			Images []image
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Get images with pagination forbidden", func(t *testing.T) {
@@ -254,7 +254,7 @@ func TestQueryImage(t *testing.T) {
 			Images []image `graphql:"images(first:1, offset:1)"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Get images with filter forbidden", func(t *testing.T) {
@@ -262,7 +262,7 @@ func TestQueryImage(t *testing.T) {
 			Images []image `graphql:"images(filter: {name:\"sec\", slug:\"slu\"})"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("No matches to filter", func(t *testing.T) {
@@ -270,7 +270,7 @@ func TestQueryImage(t *testing.T) {
 			Images []image `graphql:"images(filter:{name:\"nonexistentname\", slug:\"nonexistentslug\"})"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Invalid name attribute of filter forbidden", func(t *testing.T) {
@@ -278,7 +278,7 @@ func TestQueryImage(t *testing.T) {
 			Images []image `graphql:"images(filter: {name: \"AAZN90ESauHQynfvljT0L9JTamLV1yKThRJhJI4AusfeofWzylykVp1QwTlhVWTkOiYlssW3DEV3HUJFR7zZmkBV5GY2tZTXB4gUPITPsZv7fVbqzPu4D59ac4yTYZu2o\"})"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Invalid slug attribute of filter forbidden", func(t *testing.T) {
@@ -286,7 +286,7 @@ func TestQueryImage(t *testing.T) {
 			Images []image `graphql:"images(filter: {slug: \"eWUFMDK0FyLmKMhwRR5FvCQoE6ZFlUQ7YzvEx6Sae61DZ8ETBkXMWFW5VMV1758rHlet3ohLptyi4ys1UJ728n5LfG0hLbdjQcWSwdqzTNj9203C3BSg2MyG8zm5QEy1nRaVCz4OWXRvtQw3ryAiWdUfLOyyOpgOXxkf2SWd1ADMUoogP4HWkd2nsZrX1vWRI916oo3efqRcMgqtJCvqAOWhDDOyu4AIf0nariyqq44LuI5yT6F1To9jnLoip1X0I\"})"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Invalid pagination first field forbidden", func(t *testing.T) {
@@ -294,7 +294,7 @@ func TestQueryImage(t *testing.T) {
 			Images []image `graphql:"images(first:-1, offset:1)"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 
 	t.Run("Invalid pagination offset field forbidden", func(t *testing.T) {
@@ -302,7 +302,7 @@ func TestQueryImage(t *testing.T) {
 			Images []image `graphql:"images(first:1, offset:-1)"`
 		}
 		err := c.Query(context.Background(), &query, nil)
-		require.EqualError(t, err, forbiddenError)
+		require.EqualError(t, err, forbiddenErr)
 	})
 }
 func TestQueryImageAuthentication(t *testing.T) {

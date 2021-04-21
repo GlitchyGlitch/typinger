@@ -109,7 +109,9 @@ var imageDataSet = []image{
 	},
 }
 
-var forbiddenError = "Operation forbidden."
+var forbiddenErr = "Operation forbidden."
+var notFoundErr = "No data found."
+var existsErr = "Resource already exists."
 
 func setup(auth bool, conf *config.Config) *graphql.Client {
 	test.RenewTestData(conf.DBURL, tdPath)

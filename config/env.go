@@ -21,6 +21,9 @@ func EnvHost() string {
 
 func EnvPort() string {
 	port := os.Getenv("PORT")
+	if port == "" {
+		return "80"
+	}
 	return port
 }
 
@@ -28,7 +31,7 @@ func EnvWriteTimeout() time.Duration {
 	tStr := os.Getenv("WRITE_TIMEOUT")
 	tInt, err := strconv.Atoi(tStr)
 	if err != nil {
-		tInt = 10 // Default value
+		tInt = 10
 	}
 	t := time.Duration(tInt) * time.Second
 	return t
@@ -38,7 +41,7 @@ func EnvReadTimeout() time.Duration {
 	tStr := os.Getenv("READ_TIMEOUT")
 	tInt, err := strconv.Atoi(tStr)
 	if err != nil {
-		tInt = 5 // Default value
+		tInt = 5
 	}
 	t := time.Duration(tInt) * time.Second
 	return t
@@ -48,7 +51,7 @@ func EnvIdleTimeout() time.Duration {
 	tStr := os.Getenv("IDLE_TIMEOUT")
 	tInt, err := strconv.Atoi(tStr)
 	if err != nil {
-		tInt = 120 // Default value
+		tInt = 120
 	}
 	t := time.Duration(tInt) * time.Second
 	return t

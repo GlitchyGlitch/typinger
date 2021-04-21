@@ -1,12 +1,17 @@
 package jwtcontroller
 
 import (
-	"fmt"
+	"errors"
 	"strings"
 	"time"
 
 	"github.com/GlitchyGlitch/typinger/config"
 	"github.com/dgrijalva/jwt-go"
+)
+
+var (
+	ErrInvalidHeader = errors.New("invalid authorization header")
+	ErrInvalidToken  = errors.New("invalid token")
 )
 
 const prefix = "Bearer "
@@ -34,7 +39,7 @@ func (c JWTController) Token(id string) (string, error) {
 
 func (c JWTController) ParseAuthorization(header string) (map[string]interface{}, error) {
 	if !strings.HasPrefix(header, prefix) {
-		return nil, fmt.Errorf("invalid authorization header")
+		return nil, ErrInvalidHeader
 	}
 	rawToken := header[len(prefix):]
 
@@ -42,11 +47,11 @@ func (c JWTController) ParseAuthorization(header string) (map[string]interface{}
 		return c.Config.JWTSecret, nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("invalid token")
+		return nil, ErrInvalidToken
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
+		return nil, ErrInvalidToken
 	}
 
 	return claims, err
