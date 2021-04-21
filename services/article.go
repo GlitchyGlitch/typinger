@@ -43,7 +43,6 @@ func (a *ArticleRepo) GetArticles(ctx context.Context, filter *models.ArticleFil
 
 	err := query.Select()
 	if err != nil {
-		fmt.Println(err)
 		return nil, errs.Internal(ctx)
 	}
 	if len(articles) == 0 {
