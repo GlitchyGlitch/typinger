@@ -1,13 +1,17 @@
 package config
 
 import (
+	"errors"
 	"net"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/GlitchyGlitch/typinger/crypto"
 )
+
+var ErrInvalidStatic = errors.New("invalid static path configuration")
 
 func EnvDBURL() string {
 	url := os.Getenv("DATABASE_URL")
@@ -82,18 +86,44 @@ func EnvDomain(host string) string {
 	return domains[0]
 }
 
-func EnvImgDir() string {
-	dir := os.Getenv("IMG_DIR")
-	if dir == "" {
+func EnvImgEndpoint() string {
+	path := os.Getenv("IMG_ENDPOINT")
+	if path == "" {
 		return "img"
 	}
-	return dir
+	return path
+}
+
+func EnvStaticPath() string {
+	path := os.Getenv("STATIC_PATH")
+	if path == "" {
+		path = "./static"
+	}
+	path, err := filepath.Abs(path)
+	if err != nil {
+		panic(ErrInvalidStatic)
+	}
+	return path
+}
+
+func EnvStaticDashPath() string {
+	path := os.Getenv("STATIC_DASH_PATH")
+	if path == "" {
+		path = "./static_dash"
+	}
+	path, err := filepath.Abs(path)
+	if err != nil {
+		panic(ErrInvalidStatic)
+	}
+	return path
 }
 
 func EnvProtocol() string {
-	dir := os.Getenv("PROTOCOL")
-	if dir == "" {
+	proto := os.Getenv("PROTOCOL")
+	if proto == "" {
 		return "http"
 	}
-	return dir
+	return proto
 }
+
+// TODO: Check where to panic

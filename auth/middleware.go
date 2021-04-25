@@ -23,8 +23,6 @@ func Middleware(tc tokenController, rep repos) func(http.Handler) http.Handler {
 				return
 			}
 
-			// TODO: move to extract token
-
 			claims, err := tc.ParseAuthorization(header)
 
 			if err != nil {
@@ -38,14 +36,12 @@ func Middleware(tc tokenController, rep repos) func(http.Handler) http.Handler {
 				return
 			}
 
-			// Check if user exists
 			user, err := rep.GetUserByID(r.Context(), id)
 			if err != nil || user == nil {
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			// Put it in context
 			ctx := context.WithValue(r.Context(), key, user)
 
 			r = r.WithContext(ctx)

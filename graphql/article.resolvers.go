@@ -6,11 +6,17 @@ package graphql
 import (
 	"context"
 
+	"github.com/GlitchyGlitch/typinger/auth"
 	"github.com/GlitchyGlitch/typinger/dataloaders"
+	"github.com/GlitchyGlitch/typinger/errs"
 	"github.com/GlitchyGlitch/typinger/models"
 )
 
 func (r *articleResolver) Author(ctx context.Context, obj *models.Article) (*models.User, error) {
+	if !auth.Authorize(auth.FromContext(ctx)) {
+		return nil, errs.Forbidden(ctx)
+	}
+
 	return dataloaders.FromContext(ctx).UserByIDs.Load(obj.Author)
 }
 

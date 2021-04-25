@@ -11,7 +11,7 @@ import (
 )
 
 func (r *imageResolver) URL(ctx context.Context, obj *models.Image) (*string, error) {
-	url := fmt.Sprintf("%s://%s/%s/%s", r.Config.Protocol, r.Config.Domain, r.Config.ImgDir, obj.Slug)
+	url := fmt.Sprintf("%s://%s/%s/%s", r.Config.Protocol, r.Config.Domain, r.Config.ImgEndpoint, obj.Slug)
 	return &url, nil
 }
 

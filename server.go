@@ -20,13 +20,12 @@ import (
 	"github.com/GlitchyGlitch/typinger/services"
 	"github.com/GlitchyGlitch/typinger/validator"
 
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/go-pg/pg"
 )
 
-func router(gqlHandler http.Handler, repos *services.Repos, fAPI *fileapi.FileAPI, config *config.Config, tc *jwtcontroller.JWTController) *chi.Mux {
+func router(gqlHandler http.Handler, repos *services.Repos, DBFileAPI *fileapi.DBFileAPI, config *config.Config, tc *jwtcontroller.JWTController) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{config.Addr()},
@@ -35,9 +34,10 @@ func router(gqlHandler http.Handler, repos *services.Repos, fAPI *fileapi.FileAP
 	router.Use(auth.Middleware(tc, repos))
 	router.Use(dataloaders.Middleware(repos))
 
-	router.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
+	router.Handle("/*", http.FileServer(http.Dir(config.StaticPath)))
+	router.Handle("/dash/*", http.StripPrefix("/dash/", http.FileServer(http.Dir(config.StaticDashPath))))
 	router.Handle("/graphql", gqlHandler)
-	router.Get(fmt.Sprintf("/%s/{slug}", config.ImgDir), fAPI.GetImage)
+	router.Get(fmt.Sprintf("/%s/{slug}", config.ImgEndpoint), DBFileAPI.ImageHandler())
 	return router
 }
 
@@ -63,7 +63,7 @@ func startServer(conf *config.Config, testTime int) {
 
 	tc := jwtcontroller.New(conf)
 	repos := services.NewRepos(db, tc)
-	fAPI := fileapi.New(repos)
+	fAPI := fileapi.New(repos, conf)
 	errPresenter := graphql.ErrorPresenter() // TODO: Make it works
 	v := validator.New()
 	handler := graphql.Handler(repos, conf, v, errPresenter)
