@@ -67,7 +67,6 @@ func EnvJWTSecret() []byte {
 	if len(jwt) == 0 {
 		return crypto.GenJWTSecret()
 	}
-
 	return jwt
 }
 
